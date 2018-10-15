@@ -22,9 +22,9 @@ public:
 	void set(size_t index, Node* successor){
 		fingerTable_[index] = successor;
 	}
-	uint8_t get(size_t index) {
-		return fingerTable_[index];
-	}
+	// uint8_t get(size_t index) {
+	// 	return fingerTable_[index];
+	// }
 	// TODO: complete print function
 	void prettyPrint();
 private:
@@ -39,7 +39,9 @@ FingerTable::FingerTable(uint8_t nodeId): nodeId_(nodeId) {
 
 class Node {
 public:
-	Node(uint8_t id): id_(id){}
+	Node(uint8_t id): fingerTable_(id) {
+		
+	}
 	//TODO: implement node join function
 	/**
 	 * @param node: the first node to contact with to initialize join process. If this is the first node to join the Chord network, the parameter is NULL.
