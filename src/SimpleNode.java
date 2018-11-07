@@ -1,22 +1,28 @@
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class Node implements ChordNode {
-
+public class SimpleNode implements ChordNode {
     private int nodeId;
-    private FingerTable table;
+    private SimpleNode successor;
     private Map<Integer, Integer> map = new LinkedHashMap<>();
 
-    Node(int id) {
+    SimpleNode(int id) {
         System.out.println(id);
         nodeId = hash(id);
         System.out.println(nodeId);
-        table = null;
     }
 
     public int getId() { return nodeId; }
 
     public void setId(int id) { this.nodeId = id; }
+
+    private SimpleNode getSuccessor() {
+        return this.successor;
+    }
+
+    private void setSuccessor(SimpleNode successor) {
+        this.successor = successor;
+    }
 
     public int find(int keyId) {
         int key = hash(keyId);
@@ -31,14 +37,24 @@ public class Node implements ChordNode {
             If node is null, and that means network has to be initialized (fingertable init).
             There are ways to do this mentioned in the paper apparently.
         */
+        SimpleNode nodeI = node;
+        while (node != null && nodeI.successor.nodeId < node.nodeId) {
+            nodeI = nodeI.successor;
+        }
+
+        if (node != null) {
+            SimpleNode oldSuccessor = nodeI.successor;
+            nodeI.successor = node;
+            node.successor = oldSuccessor;
+        }
     }
 
     public void insert(int keyId) {
         /*
-        *
-        * Insert the key into the correct node.
-        *
-        * */
+         *
+         * Insert the key into the correct node.
+         *
+         * */
 
         int key = hash(keyId);
 
@@ -52,7 +68,6 @@ public class Node implements ChordNode {
 
     public void prettyPrint() {
         System.out.println("Node ID: " + nodeId);
-        this.table.prettyPrint();
     }
 
     protected int hash(int number) { return number & 0xff; }
