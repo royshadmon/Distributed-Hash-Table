@@ -1,0 +1,5 @@
+# ignore all logs
+*.iml
+*.xml
+*.name
+*.swp
