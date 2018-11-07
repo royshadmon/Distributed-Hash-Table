@@ -6,7 +6,7 @@ public class Node implements ChordNode {
     private FingerTable table;
     private HashMap<Integer, Integer> map = new HashMap<>();
 
-    Node(byte id) {
+    Node(int id) {
         System.out.println(id);
         nodeId = hash(id);
         System.out.println(nodeId);
@@ -15,11 +15,12 @@ public class Node implements ChordNode {
 
     public int getId() { return nodeId; }
 
-    public void setId(byte id) { this.nodeId = hash(id); }
-
     public void setId(int id) { this.nodeId = id; }
 
-    public void find() { }
+    public int find() {
+
+        return 0;
+    }
 
     public void join(Node node) {
         /*
@@ -28,7 +29,7 @@ public class Node implements ChordNode {
         */
     }
 
-    public void insert(byte keyId, byte val) {
+    public void insert(int keyId, int val) {
         int key = hash(keyId);
         int value = hash(val); // Yes we need to
 
@@ -37,7 +38,7 @@ public class Node implements ChordNode {
         // Lots of extra stuff to be done
     }
 
-    public void remove(byte key) {
+    public void remove(int key) {
         int keyId = hash(key);
     }
 
@@ -46,18 +47,9 @@ public class Node implements ChordNode {
         this.table.prettyPrint();
     }
 
-    private int hash(byte number) {
-        /*
-            Input should be unsigned integer. So I'm just converting the byte to an unsigned integer.
-            May not be required/Ask TA
-         */
-
-        return number & 0xff;
-    }
+    private int hash(int number) { return number & 0xff; }
 
     public static void main(String[] args) {
-
-        ChordNode node = new Node((byte) 0);
-
+        ChordNode node = new Node(256);
     }
 }
