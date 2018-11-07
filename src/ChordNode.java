@@ -1,5 +1,3 @@
-package Chord;
-
 public interface ChordNode {
 
     void join(Node node);

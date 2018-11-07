@@ -1,5 +1,3 @@
-package Chord;
-
 import java.util.HashMap;
 
 public class Node implements ChordNode {
@@ -44,7 +42,7 @@ public class Node implements ChordNode {
     }
 
     public void prettyPrint() {
-        System.out.println("Chord.Node ID: " + nodeId);
+        System.out.println("Node ID: " + nodeId);
         this.table.prettyPrint();
     }
 
