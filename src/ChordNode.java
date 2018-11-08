@@ -1,8 +1,12 @@
 public interface ChordNode {
 
-    void join(Node node);
-    int find();
-    void insert(int key, int value);
-    void remove(int key);
+    final static int FINGER_TABLE_LENGTH = 5;
+    final static int MAX_NODES = 256;
+
+    int find(int keyId);
+
+    void join(ChordNode node);
+    void insert(int keyId);
+    void remove(int keyId);
     void prettyPrint();
 }
