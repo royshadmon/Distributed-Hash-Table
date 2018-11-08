@@ -1,3 +1,6 @@
+import com.sun.istack.internal.Nullable;
+import sun.java2d.pipe.SpanShapeRenderer;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -32,21 +35,32 @@ public class SimpleNode implements ChordNode {
         return 0;
     }
 
-    public void join(SimpleNode node) {
+    @Nullable public void join(SimpleNode node) {
         /*
             If node is null, and that means network has to be initialized (fingertable init).
             There are ways to do this mentioned in the paper apparently.
         */
-        SimpleNode nodeI = node;
-        while (node != null && nodeI.successor.nodeId < node.nodeId) {
-            nodeI = nodeI.successor;
-        }
 
         if (node != null) {
-            SimpleNode oldSuccessor = nodeI.successor;
-            nodeI.successor = node;
-            node.successor = oldSuccessor;
+            SimpleNode nodeI = node;
+            SimpleNode nodePrev = node;
+            //System.out.println("ID: " + this.nodeId);
+            while (nodeI.successor.nodeId > this.nodeId && nodeI.nodeId < this.nodeId) {
+                nodePrev = nodeI;
+                nodeI = nodeI.successor;
+            }
+
+            SimpleNode newSuccessor = nodeI.successor;
+            this.successor = nodeI;
+            nodePrev.successor = this;
+
+
+
         }
+        else {
+            this.successor = this;
+        }
+
     }
 
     public void insert(int keyId) {
