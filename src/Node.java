@@ -26,7 +26,7 @@ public class Node implements ChordNode {
         return 0;
     }
 
-    public void join(Node node) {
+    public void join(ChordNode node) {
         /*
             If node is null, and that means network has to be initialized (fingertable init).
             There are ways to do this mentioned in the paper apparently.
