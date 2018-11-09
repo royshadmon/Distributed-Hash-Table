@@ -1,17 +1,19 @@
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class Node implements ChordNode {
+public class Node {
 
     private int nodeId;
-    private FingerTable table;
+    private HashMap<Integer, Node> fingerTable = new HashMap<>();
     private Map<Integer, Integer> map = new LinkedHashMap<>();
+
+    private int m = 3;
 
     Node(int id) {
         System.out.println(id);
         nodeId = hash(id);
         System.out.println(nodeId);
-        table = null;
     }
 
     public int getId() { return nodeId; }
@@ -26,11 +28,18 @@ public class Node implements ChordNode {
         return 0;
     }
 
-    public void join(ChordNode node) {
+    public void join(Node node) {
         /*
             If node is null, and that means network has to be initialized (fingertable init).
             There are ways to do this mentioned in the paper apparently.
         */
+
+    }
+
+    private void initializeFirstNode() {
+        for (int i = 0; i < m; i++) {
+            this.fingerTable.put((this.nodeId + 2^i) % (2^m), this);
+        }
     }
 
     public void insert(int keyId) {
@@ -50,10 +59,8 @@ public class Node implements ChordNode {
         int keyId = hash(key);
     }
 
-    public void prettyPrint() {
-        System.out.println("Node ID: " + nodeId);
-        this.table.prettyPrint();
-    }
-
     protected int hash(int number) { return number & 0xff; }
+
+
+
 }
