@@ -1,66 +1,78 @@
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 public class Node {
 
     private int nodeId;
-    private HashMap<Integer, Node> fingerTable = new HashMap<>();
-    private Map<Integer, Integer> map = new LinkedHashMap<>();
-
-    private int m = 3;
+    public Node successor;
+    public Node predecessor;
+    private FingerTable table;
+    private List<Integer> keys = new ArrayList<>();
 
     Node(int id) {
-        System.out.println(id);
-        nodeId = hash(id);
-        System.out.println(nodeId);
+        this.nodeId = hash(id);
+        //this.table = new FingerTable(this.nodeId);  Don't uncomment unless finger tables get populated on their own
+        successor = null;
+        predecessor = null;
     }
+
+    public Node findSuccessor(Node node) {
+
+        if (this.equals(node)) return this;
+
+        Node nPrime = this.findPredecessor(node);
+        return nPrime.successor;
+    }
+
+    public Node findPredecessor(Node node) {
+        if (this.successor.equals(node)) return this;
+
+        Node nPrime = this;
+
+        /*
+         *  node.getId() should not be between nPrime.getId() and nPrime.successor
+         *  nPrime.getId() < node.getId() <= nPrime.successor.getId()
+         *  nPrime.getId() >= node.getId() || node.getId > nPrime.successor.getId()
+         */
+
+        while (!(nPrime.getId() < node.getId() && node.getId() <= nPrime.successor.getId())) {
+
+            if (nPrime.equals(nPrime.closestPrecedingFinger(node))) return nPrime;
+            else nPrime = nPrime.closestPrecedingFinger(node);
+        }
+
+        return nPrime;
+
+    }
+
+    public Node closestPrecedingFinger(Node node) {
+
+        for (int i = FingerTable.MAX_ENTRIES; i >=1; i--) {
+            Node fingerNodeI = this.table.get(i);
+            if (this.getId() < fingerNodeI.getId() && fingerNodeI.getId() < node.getId())
+                return fingerNodeI;
+        }
+
+        return this;
+    }
+
+    private int hash(int number) { return number & 0xff; }
+
+    /************************************************************************************************
+
+       GETTERS AND SETTERS
+
+     ***********************************************************************************************/
 
     public int getId() { return nodeId; }
 
     public void setId(int id) { this.nodeId = id; }
 
-    public int find(int keyId) {
-        int key = hash(keyId);
-        /*
-         * Finds the node which has the key and returns that node's node Id.
-         */
-        return 0;
-    }
+    public FingerTable getFingerTable() { return this.table; }
 
-    public void join(Node node) {
-        /*
-            If node is null, and that means network has to be initialized (fingertable init).
-            There are ways to do this mentioned in the paper apparently.
-        */
+    public void setFingerTable(FingerTable fingerTable) { this.table = fingerTable; }
 
-    }
+    public List<Integer> getKeys() { return keys; }
 
-    private void initializeFirstNode() {
-        for (int i = 0; i < m; i++) {
-            this.fingerTable.put((this.nodeId + 2^i) % (2^m), this);
-        }
-    }
-
-    public void insert(int keyId) {
-        /*
-        *
-        * Insert the key into the correct node.
-        *
-        * */
-
-        int key = hash(keyId);
-
-        // Somehow find the correct node Id and then insert there
-
-    }
-
-    public void remove(int key) {
-        int keyId = hash(key);
-    }
-
-    protected int hash(int number) { return number & 0xff; }
-
-
-
+    public void setKeys(List<Integer> keys) { this.keys = keys; }
 }
