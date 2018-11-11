@@ -11,9 +11,54 @@ public class Node {
 
     Node(int id) {
         this.nodeId = hash(id);
-        //this.table = new FingerTable(this.nodeId);  Don't uncomment unless finger tables get populated on their own
+        this.table = new FingerTable(this.nodeId);  //Don't uncomment unless finger tables get populated on their own
         successor = null;
         predecessor = null;
+    }
+
+    public void join(Node node) {
+        if (node != null) {
+            this.initFingerTable(node);
+            this.updateOthers();
+        }
+        else {
+            for (int i = 1; i <= FingerTable.MAX_ENTRIES; i++) {
+                this.table.put(i, this);
+            }
+            this.predecessor = this;
+        }
+    }
+
+    private void initFingerTable(Node node) {
+        this.table.put(1, node.findSuccessor(this.table.get(1)));
+
+        this.predecessor = this.successor.predecessor;
+        this.successor.predecessor = this;
+
+        for (int i = 1; i < FingerTable.MAX_ENTRIES - 1; i++) {
+            if (this.table.get(i+1).getId() >= this.getId() && this.table.get(i+1).getId() < this.table.get(i).getId()) {
+                this.table.put(i + 1, this.table.get(i));
+            }
+            else {
+                this.table.put(i+1, node.findSuccessor(this.table.get(i+1)));
+            }
+        }
+    }
+
+    private void updateOthers() {
+        for (int i = 1; i <= FingerTable.MAX_ENTRIES; i++) {
+            Node temp = new Node(this.getId() - (int) Math.pow(2,i-1));
+            Node p = findPredecessor(temp);
+            p.updateFingerTable(this, i);
+        }
+    }
+
+    private void updateFingerTable(Node node, int i) {
+        if (node.getId() >= this.getId() && node.getId() < this.table.get(i).getId()) {
+            this.table.put(i, node);
+            Node p = this.predecessor;
+            p.updateFingerTable(node, i);
+        }
     }
 
     public Node findSuccessor(Node node) {
