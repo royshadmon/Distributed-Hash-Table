@@ -1,108 +1,79 @@
+import java.util.SortedSet;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.TreeSet;
+import java.util.Comparator;
+import java.util.Iterator;
 
 
 public class Node {
 
     private int nodeId;
-    public Node successor;
-    public Node predecessor;
     private FingerTable table;
+    private static int m = FingerTable.MAX_ENTRIES;
 
     private List<Integer> keys = new ArrayList<>();
 
+
     Node(int id) {
         this.nodeId = hash(id);
-        this.table = new FingerTable(this.nodeId);  //Don't uncomment unless finger tables get populated on their own
-        successor = null;
-        predecessor = null;
+        this.table = new FingerTable(this.nodeId);
     }
 
     public void join(Node node) {
-        if (node != null) {
-            this.initFingerTable(node);
-            this.updateOthers();
+        if (node == null) {
+            this.initNetwork();
         }
         else {
-            for (int i = 1; i <= FingerTable.MAX_ENTRIES; i++) {
-                this.table.put(i, this);
+            List<Node> nodeList = node.getActiveNodes();
+            nodeList.add(this);
+            this.initFingerTable(nodeList);
+
+
+        }
+    }
+
+    // Lookup how to sort ArrayList. You may need to the comparator class to sort by ID
+
+    private void initFingerTable(List<Node> nodeList) {
+        for (int i = 1; i <= m; i++) {
+            int val = FingerTable.hash(i);
+
+            for (Node node:nodeList) {
+
             }
-            this.predecessor = this;
-            this.successor = this;
+
+            this.table.put(i,  );
         }
     }
 
-    private void initFingerTable(Node node) {
-        this.table.put(1, this.findSuccessor(node.table.get(1)));
 
-        this.predecessor = this.successor.predecessor;
-        this.successor.predecessor = this;
+    public List<Node> getActiveNodes(){
+        List<Node> list = new ArrayList<>();
 
-        for (int i = 1; i < FingerTable.MAX_ENTRIES - 1; i++) {
-            if (this.table.get(i+1).getId() >= this.getId() && this.table.get(i+1).getId() < this.table.get(i).getId()) {
-                this.table.put(i + 1, this.table.get(i));
-            }
-            else {
-                this.table.put(i+1, node.findSuccessor(this.table.get(i+1)));
-            }
+        Node temp = this;
+
+        while (temp.getSuccessor() != this) {
+            list.add(temp);
+            temp = temp.getSuccessor();
+        }
+        list.add(temp);
+
+        return list;
+    }
+
+    private Node getSuccessor() {
+        return this.table.get(1);
+    }
+
+
+    // initialize fingertable of first node joining the network
+    private void initNetwork() {
+        for (int i = 1; i <= m; i++) {
+            this.table.put(i, this);
         }
     }
 
-    private void updateOthers() {
-        for (int i = 1; i <= FingerTable.MAX_ENTRIES; i++) {
-            Node temp = new Node(this.getId() - (int) Math.pow(2,i-1));
-            Node p = findPredecessor(temp);
-            p.updateFingerTable(this, i);
-        }
-    }
-
-    private void updateFingerTable(Node node, int i) {
-        if (node.getId() >= this.getId() && node.getId() < this.table.get(i).getId()) {
-            this.table.put(i, node);
-            Node p = this.predecessor;
-            p.updateFingerTable(node, i);
-        }
-    }
-
-    public Node findSuccessor(Node node) {
-
-        if (this.equals(node)) return this;
-
-        Node nPrime = this.findPredecessor(node);
-        return nPrime.successor;
-    }
-
-    public Node findPredecessor(Node node) {
-        if (this.successor.equals(node)) return this;
-
-        Node nPrime = this;
-
-        /*
-         *  node.getId() should not be between nPrime.getId() and nPrime.successor
-         *  nPrime.getId() < node.getId() <= nPrime.successor.getId()
-         *  nPrime.getId() >= node.getId() || node.getId > nPrime.successor.getId()
-         */
-
-        while (!(nPrime.getId() < node.getId() && node.getId() <= nPrime.successor.getId())) {
-
-            if (nPrime.equals(nPrime.closestPrecedingFinger(node))) return nPrime;
-            else nPrime = nPrime.closestPrecedingFinger(node);
-        }
-
-        return nPrime;
-
-    }
-
-    public Node closestPrecedingFinger(Node node) {
-
-        for (int i = FingerTable.MAX_ENTRIES; i >=1; i--) {
-            Node fingerNodeI = this.table.get(i);
-            if (this.getId() < fingerNodeI.getId() && fingerNodeI.getId() < node.getId())
-                return fingerNodeI;
-        }
-
-        return this;
-    }
 
     private int hash(int number) { return number & 0xff; }
 

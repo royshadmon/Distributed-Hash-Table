@@ -37,7 +37,7 @@ class FingerTable {
         System.out.println("----------------------");
     }
 
-    private Integer hash(Integer entryNumber) {
+    public static Integer hash(Integer entryNumber) {
         //return this.hostNodeId + ((Math.pow(2,entryNumber)) % (Math.pow(2, MAX_ENTRIES)));
         return this.hostNodeId + (int) ((Math.pow(2, entryNumber - 1)) % (Math.pow(2, MAX_ENTRIES)));
     }
