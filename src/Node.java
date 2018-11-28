@@ -26,11 +26,12 @@ public class Node {
                 this.table.put(i, this);
             }
             this.predecessor = this;
+            this.successor = this;
         }
     }
 
     private void initFingerTable(Node node) {
-        this.table.put(1, node.findSuccessor(this.table.get(1)));
+        this.table.put(1, this.findSuccessor(node.table.get(1)));
 
         this.predecessor = this.successor.predecessor;
         this.successor.predecessor = this;
@@ -109,7 +110,7 @@ public class Node {
 
      ***********************************************************************************************/
 
-    public int getId() { return nodeId; }
+    public int getId() { return this.nodeId; }
 
     public void setId(int id) { this.nodeId = id; }
 

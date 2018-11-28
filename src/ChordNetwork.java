@@ -37,7 +37,7 @@ public class ChordNetwork {
         node1.setFingerTable(ftable1);
         node3.setFingerTable(ftable3);
 
-        System.out.println(node0.findSuccessor(node0).getId());
+        System.out.println(node0.findSuccessor(node1).getId());
 
     }
 }
