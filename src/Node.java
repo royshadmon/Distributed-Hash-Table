@@ -1,59 +1,126 @@
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
-public class Node implements ChordNode {
+
+public class Node {
 
     private int nodeId;
+    public Node successor;
+    public Node predecessor;
     private FingerTable table;
-    private Map<Integer, Integer> map = new LinkedHashMap<>();
+
+    private List<Integer> keys = new ArrayList<>();
 
     Node(int id) {
-        System.out.println(id);
-        nodeId = hash(id);
-        System.out.println(nodeId);
-        table = null;
+        this.nodeId = hash(id);
+        this.table = new FingerTable(this.nodeId);  //Don't uncomment unless finger tables get populated on their own
+        successor = null;
+        predecessor = null;
     }
 
-    public int getId() { return nodeId; }
+    public void join(Node node) {
+        if (node != null) {
+            this.initFingerTable(node);
+            this.updateOthers();
+        }
+        else {
+            for (int i = 1; i <= FingerTable.MAX_ENTRIES; i++) {
+                this.table.put(i, this);
+            }
+            this.predecessor = this;
+            this.successor = this;
+        }
+    }
+
+    private void initFingerTable(Node node) {
+        this.table.put(1, this.findSuccessor(node.table.get(1)));
+
+        this.predecessor = this.successor.predecessor;
+        this.successor.predecessor = this;
+
+        for (int i = 1; i < FingerTable.MAX_ENTRIES - 1; i++) {
+            if (this.table.get(i+1).getId() >= this.getId() && this.table.get(i+1).getId() < this.table.get(i).getId()) {
+                this.table.put(i + 1, this.table.get(i));
+            }
+            else {
+                this.table.put(i+1, node.findSuccessor(this.table.get(i+1)));
+            }
+        }
+    }
+
+    private void updateOthers() {
+        for (int i = 1; i <= FingerTable.MAX_ENTRIES; i++) {
+            Node temp = new Node(this.getId() - (int) Math.pow(2,i-1));
+            Node p = findPredecessor(temp);
+            p.updateFingerTable(this, i);
+        }
+    }
+
+    private void updateFingerTable(Node node, int i) {
+        if (node.getId() >= this.getId() && node.getId() < this.table.get(i).getId()) {
+            this.table.put(i, node);
+            Node p = this.predecessor;
+            p.updateFingerTable(node, i);
+        }
+    }
+
+    public Node findSuccessor(Node node) {
+
+        if (this.equals(node)) return this;
+
+        Node nPrime = this.findPredecessor(node);
+        return nPrime.successor;
+    }
+
+    public Node findPredecessor(Node node) {
+        if (this.successor.equals(node)) return this;
+
+        Node nPrime = this;
+
+        /*
+         *  node.getId() should not be between nPrime.getId() and nPrime.successor
+         *  nPrime.getId() < node.getId() <= nPrime.successor.getId()
+         *  nPrime.getId() >= node.getId() || node.getId > nPrime.successor.getId()
+         */
+
+        while (!(nPrime.getId() < node.getId() && node.getId() <= nPrime.successor.getId())) {
+
+            if (nPrime.equals(nPrime.closestPrecedingFinger(node))) return nPrime;
+            else nPrime = nPrime.closestPrecedingFinger(node);
+        }
+
+        return nPrime;
+
+    }
+
+    public Node closestPrecedingFinger(Node node) {
+
+        for (int i = FingerTable.MAX_ENTRIES; i >=1; i--) {
+            Node fingerNodeI = this.table.get(i);
+            if (this.getId() < fingerNodeI.getId() && fingerNodeI.getId() < node.getId())
+                return fingerNodeI;
+        }
+
+        return this;
+    }
+
+    private int hash(int number) { return number & 0xff; }
+
+    /************************************************************************************************
+
+       GETTERS AND SETTERS
+
+     ***********************************************************************************************/
+
+    public int getId() { return this.nodeId; }
 
     public void setId(int id) { this.nodeId = id; }
 
-    public int find(int keyId) {
-        int key = hash(keyId);
-        /*
-         * Finds the node which has the key and returns that node's node Id.
-         */
-        return 0;
-    }
+    public FingerTable getFingerTable() { return this.table; }
 
-    public void join(ChordNode node) {
-        /*
-            If node is null, and that means network has to be initialized (fingertable init).
-            There are ways to do this mentioned in the paper apparently.
-        */
-    }
+    public void setFingerTable(FingerTable fingerTable) { this.table = fingerTable; }
 
-    public void insert(int keyId) {
-        /*
-        *
-        * Insert the key into the correct node.
-        *
-        * */
+    public List<Integer> getKeys() { return keys; }
 
-        int key = hash(keyId);
-
-        // Somehow find the correct node Id and then insert there
-
-    }
-
-    public void remove(int key) {
-        int keyId = hash(key);
-    }
-
-    public void prettyPrint() {
-        System.out.println("Node ID: " + nodeId);
-        this.table.prettyPrint();
-    }
-
-    protected int hash(int number) { return number & 0xff; }
+    public void setKeys(List<Integer> keys) { this.keys = keys; }
 }
