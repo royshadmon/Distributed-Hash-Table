@@ -30,9 +30,11 @@ public class ChordNetwork {
         node1.setFingerTable(ftable1);
         node3.setFingerTable(ftable3);
 
-        node1.getActiveNodes().forEach((node -> {
-            System.out.println(node.getId());
-        }));
+        Node node2 = new Node(6);
+
+        node2.join(node3);
+
+
 
     }
 }
