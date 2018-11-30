@@ -19,11 +19,53 @@ public class Node {
 
     public void join(Node node) {
         if (node == null) {
+            System.out.println("Initialized Network");
+            System.out.println("Node " + this.getId() + " has joined");
+            System.out.println("----------------------");
             this.initNetwork();
         }
         else {
             this.initializeNode(node);
+            System.out.println("Node " + this.getId() + " has joined");
+            System.out.println("Migrating keys to node " + this.getId());
+            System.out.println();
+
+            this.migrateKeys();
         }
+    }
+
+    private void migrateKeys() {
+        // 1. This function should find the successor of the node, from the finger table,
+        // 2. Update the successor's key set to remove keys it should no longer manage.
+        // 3. Add those keys to this node's key set
+
+        // Should work even when there are no keys in the system
+
+        List<Integer> newKeys = this.getSuccessor().updateKeys(this.getId());
+        System.out.println("Adding them to new node " + this.getId());
+        this.getKeys().addAll(newKeys);
+        System.out.println("----------------------");
+        System.out.println();
+    }
+
+    private List<Integer> updateKeys(int ID) {
+        System.out.println("Updating keys of Node " + this.getId());
+        System.out.println();
+        List<Integer> removedKeys = new ArrayList<>();
+
+        for (int i=0; i < this.getKeys().size(); i++) {
+            /* if the key is less than or equal to the ID, but not equal to the current node's ID,
+             it should be removed from this node's keyset */
+            int key = this.getKeys().get(i);
+            if (key <= ID && key !=this.getId()) {
+                System.out.println("Removing key with ID: " + key);
+                removedKeys.add(key);
+                this.getKeys().remove(i);
+                i--;
+            }
+
+        }
+        return removedKeys;
     }
 
     private void initializeNode(Node node) {
@@ -39,31 +81,6 @@ public class Node {
 
     private void updateFingerTable(List<Node> list) {
         this.initFingerTable(list);
-    }
-
-    // Possible optimisations. Don't know if they work correctly
-    public Node findPredecessor(Node node, List<Node> list) {
-
-        int index = Collections.binarySearch(list, node, new NodeComparator());
-
-        if (index == 0) return list.get(list.size() - 1);
-        else return list.get(index - 1);
-    }
-
-    // Possible optimisations. Don't know if they work correctly
-    public Node findPredecessorWithId(int nodeId, List<Node> list) {
-
-        if (list.get(0).getId() == nodeId) return list.get(list.size() - 1);
-        int index = 0;
-        for (int i = 1; i < list.size(); i++) {
-
-            if (list.get(i).getId() == nodeId) {
-                index = i - 1;
-                break;
-            }
-        }
-
-        return list.get(index);
     }
 
     private void initFingerTable(List<Node> list) {
@@ -139,15 +156,4 @@ public class Node {
             return a.getId() - b.getId();
         }
     }
-
-    // May be needed when doing the optimisations
-    public Node worseFindPredecessor(Node node) {
-        Node temp = node;
-        while (temp.getSuccessor() != node) {
-            temp = temp.getSuccessor();
-        }
-
-        return temp;
-    }
-
 }
