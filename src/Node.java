@@ -1,110 +1,109 @@
-import java.util.List;
 import java.util.ArrayList;
-
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class Node {
 
     private int nodeId;
-    public Node successor;
-    public Node predecessor;
     private FingerTable table;
+    private static int m = FingerTable.MAX_ENTRIES;
 
-    private List<Integer> keys = new ArrayList<>();
+    private List<Integer> keys;
 
     Node(int id) {
         this.nodeId = hash(id);
-        this.table = new FingerTable(this.nodeId);  //Don't uncomment unless finger tables get populated on their own
-        successor = null;
-        predecessor = null;
+        this.table = new FingerTable(this.nodeId);
+        this.keys = new ArrayList<>();
     }
 
     public void join(Node node) {
-        if (node != null) {
-            this.initFingerTable(node);
-            this.updateOthers();
+        if (node == null) {
+            this.initNetwork();
         }
         else {
-            for (int i = 1; i <= FingerTable.MAX_ENTRIES; i++) {
-                this.table.put(i, this);
+            this.initializeNode(node);
+        }
+    }
+
+    private void initializeNode(Node node) {
+        List<Node> nodeList = node.getActiveNodes();
+        nodeList.add(this);
+        nodeList.sort(new NodeComparator());
+
+        this.initFingerTable(nodeList);
+        this.updateOthers(nodeList);
+    }
+
+    private void updateOthers(List<Node> list) { list.forEach(node -> node.updateFingerTable(list)); }
+
+    private void updateFingerTable(List<Node> list) {
+        this.initFingerTable(list);
+    }
+
+    // Possible optimisations. Don't know if they work correctly
+    public Node findPredecessor(Node node, List<Node> list) {
+
+        int index = Collections.binarySearch(list, node, new NodeComparator());
+
+        if (index == 0) return list.get(list.size() - 1);
+        else return list.get(index - 1);
+    }
+
+    // Possible optimisations. Don't know if they work correctly
+    public Node findPredecessorWithId(int nodeId, List<Node> list) {
+
+        if (list.get(0).getId() == nodeId) return list.get(list.size() - 1);
+        int index = 0;
+        for (int i = 1; i < list.size(); i++) {
+
+            if (list.get(i).getId() == nodeId) {
+                index = i - 1;
+                break;
             }
-            this.predecessor = this;
-            this.successor = this;
-        }
-    }
-
-    private void initFingerTable(Node node) {
-        this.table.put(1, this.findSuccessor(node.table.get(1)));
-
-        this.predecessor = this.successor.predecessor;
-        this.successor.predecessor = this;
-
-        for (int i = 1; i < FingerTable.MAX_ENTRIES - 1; i++) {
-            if (this.table.get(i+1).getId() >= this.getId() && this.table.get(i+1).getId() < this.table.get(i).getId()) {
-                this.table.put(i + 1, this.table.get(i));
-            }
-            else {
-                this.table.put(i+1, node.findSuccessor(this.table.get(i+1)));
-            }
-        }
-    }
-
-    private void updateOthers() {
-        for (int i = 1; i <= FingerTable.MAX_ENTRIES; i++) {
-            Node temp = new Node(this.getId() - (int) Math.pow(2,i-1));
-            Node p = findPredecessor(temp);
-            p.updateFingerTable(this, i);
-        }
-    }
-
-    private void updateFingerTable(Node node, int i) {
-        if (node.getId() >= this.getId() && node.getId() < this.table.get(i).getId()) {
-            this.table.put(i, node);
-            Node p = this.predecessor;
-            p.updateFingerTable(node, i);
-        }
-    }
-
-    public Node findSuccessor(Node node) {
-
-        if (this.equals(node)) return this;
-
-        Node nPrime = this.findPredecessor(node);
-        return nPrime.successor;
-    }
-
-    public Node findPredecessor(Node node) {
-        if (this.successor.equals(node)) return this;
-
-        Node nPrime = this;
-
-        /*
-         *  node.getId() should not be between nPrime.getId() and nPrime.successor
-         *  nPrime.getId() < node.getId() <= nPrime.successor.getId()
-         *  nPrime.getId() >= node.getId() || node.getId > nPrime.successor.getId()
-         */
-
-        while (!(nPrime.getId() < node.getId() && node.getId() <= nPrime.successor.getId())) {
-
-            if (nPrime.equals(nPrime.closestPrecedingFinger(node))) return nPrime;
-            else nPrime = nPrime.closestPrecedingFinger(node);
         }
 
-        return nPrime;
-
+        return list.get(index);
     }
 
-    public Node closestPrecedingFinger(Node node) {
-
-        for (int i = FingerTable.MAX_ENTRIES; i >=1; i--) {
-            Node fingerNodeI = this.table.get(i);
-            if (this.getId() < fingerNodeI.getId() && fingerNodeI.getId() < node.getId())
-                return fingerNodeI;
+    private void initFingerTable(List<Node> list) {
+        for (int i =1; i <= m; i++) {
+            int val = FingerTable.hash(this.nodeId, i);
+            Node successor = this.findSuccessor(val, list);
+            this.table.put(i, successor);
         }
-
-        return this;
+//        this.table.prettyPrint(); // Need this in final submission but commented out for debugging
     }
 
-    private int hash(int number) { return number & 0xff; }
+    private Node findSuccessor(int val, List<Node> list) {
+        for (int i = 0; i < list.size() - 1; i++) {
+            if (list.get(i).getId() == val) return list.get(i); // May not need this condition
+            if (list.get(i).getId() < val && val <= list.get(i+1).getId()) return list.get(i+1);
+        }
+        return list.get(0);
+    }
+
+    private List<Node> getActiveNodes(){
+        List<Node> list = new ArrayList<>();
+
+        Node temp = this;
+        while (temp.getSuccessor() != this) {
+            list.add(temp);
+            temp = temp.getSuccessor();
+        }
+        list.add(temp);
+
+        list.sort(new NodeComparator()); //
+
+        return list;
+    }
+
+    // initialize Finger Table of first node joining the network
+    private void initNetwork() {
+        for (int i = 1; i <= m; i++) {
+            this.table.put(i, this);
+        }
+    }
 
     /************************************************************************************************
 
@@ -123,4 +122,32 @@ public class Node {
     public List<Integer> getKeys() { return keys; }
 
     public void setKeys(List<Integer> keys) { this.keys = keys; }
+
+
+    /************************************************************************************************
+
+     PRIVATE METHODS
+
+     ***********************************************************************************************/
+
+    private Node getSuccessor() { return this.table.get(1); }
+
+    private int hash(int number) { return number & 0xff; }
+
+    class NodeComparator implements Comparator<Node> {
+        public int compare(Node a, Node b) {
+            return a.getId() - b.getId();
+        }
+    }
+
+    // May be needed when doing the optimisations
+    public Node worseFindPredecessor(Node node) {
+        Node temp = node;
+        while (temp.getSuccessor() != node) {
+            temp = temp.getSuccessor();
+        }
+
+        return temp;
+    }
+
 }

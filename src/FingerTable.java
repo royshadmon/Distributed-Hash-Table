@@ -3,7 +3,9 @@ import java.util.HashMap;
 class FingerTable {
     private int hostNodeId;
 
-    public static final int MAX_ENTRIES = 3;
+    static final int MAX_ENTRIES = 3;
+
+    private static final int MOD = (int) (Math.pow(2, MAX_ENTRIES));
     private HashMap<Integer, Node> fingerTable = new HashMap<>();
 
     FingerTable(Integer hostNodeId) {
@@ -14,6 +16,7 @@ class FingerTable {
         if (entryNumber == 0) throw new RuntimeException("Entries start from 1");
         if (entryNumber > MAX_ENTRIES) throw new RuntimeException("Exceeded number of entries. " +
                 "Only " + MAX_ENTRIES + " entries are allowed.");
+
         Integer key = hash(entryNumber);
         return this.fingerTable.get(key);
     }
@@ -22,6 +25,7 @@ class FingerTable {
         if (entryNumber == 0) throw new RuntimeException("Entries start from 1");
         if (entryNumber > MAX_ENTRIES) throw new RuntimeException("Exceeded number of entries. " +
                 "Only " + MAX_ENTRIES + " entries are allowed.");
+
         Integer key = hash(entryNumber);
         this.fingerTable.put(key, node);
     }
@@ -38,14 +42,22 @@ class FingerTable {
     }
 
     private Integer hash(Integer entryNumber) {
-        //return this.hostNodeId + ((Math.pow(2,entryNumber)) % (Math.pow(2, MAX_ENTRIES)));
-        return this.hostNodeId + (int) ((Math.pow(2, entryNumber - 1)) % (Math.pow(2, MAX_ENTRIES)));
+        int index = this.hostNodeId + (int) ((Math.pow(2, entryNumber - 1)));
+        index = index % MOD;
+        return index;
+
+    }
+
+    static Integer hash(int hostNodeId, int entryNumber) {
+        int index = hostNodeId + (int) ((Math.pow(2, entryNumber - 1)));
+        index = index % MOD;
+        return index;
     }
 
     public static void main(String[] args) {
         FingerTable f = new FingerTable(0);
 
-        //System.out.println(f.hash(3));
+        System.out.println(f.hash(3));
         int ent1 = 3;
         int ent2 = 2;
         System.out.println(ent1 % Math.pow(2, MAX_ENTRIES));
@@ -54,8 +66,8 @@ class FingerTable {
         f.put(ent1, new Node(10));
         f.put(ent2, new Node(1));
 
-
         System.out.println(f.get(ent1).getId());
         System.out.println(f.get(ent2).getId());
+
     }
 }

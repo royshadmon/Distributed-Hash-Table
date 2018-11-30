@@ -3,4 +3,4 @@
 *.xml
 *.name
 *.swp
-*.class
+**.class
