@@ -3,7 +3,7 @@ import java.util.HashMap;
 class FingerTable {
     private int hostNodeId;
 
-    public static final int MAX_ENTRIES = 3;
+    static final int MAX_ENTRIES = 3;
 
     private static final int MOD = (int) (Math.pow(2, MAX_ENTRIES));
     private HashMap<Integer, Node> fingerTable = new HashMap<>();
@@ -41,14 +41,14 @@ class FingerTable {
         System.out.println("----------------------");
     }
 
-    public Integer hash(Integer entryNumber) {
+    private Integer hash(Integer entryNumber) {
         int index = this.hostNodeId + (int) ((Math.pow(2, entryNumber - 1)));
         index = index % MOD;
         return index;
 
     }
 
-    public static Integer hash(int hostNodeId, int entryNumber) {
+    static Integer hash(int hostNodeId, int entryNumber) {
         int index = hostNodeId + (int) ((Math.pow(2, entryNumber - 1)));
         index = index % MOD;
         return index;

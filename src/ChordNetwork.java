@@ -58,5 +58,10 @@ public class ChordNetwork {
         node1.getFingerTable().prettyPrint();
         node3.getFingerTable().prettyPrint();
         node6.getFingerTable().prettyPrint();
+
+        Node node5 = new Node(5);
+        node5.join(node3);
+
+        node5.getFingerTable().prettyPrint();
     }
 }

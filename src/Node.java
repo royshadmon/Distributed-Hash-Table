@@ -9,11 +9,12 @@ public class Node {
     private FingerTable table;
     private static int m = FingerTable.MAX_ENTRIES;
 
-    private List<Integer> keys = new ArrayList<>();
+    private List<Integer> keys;
 
     Node(int id) {
         this.nodeId = hash(id);
         this.table = new FingerTable(this.nodeId);
+        this.keys = new ArrayList<>();
     }
 
     public void join(Node node) {
@@ -25,7 +26,7 @@ public class Node {
         }
     }
 
-    private void initializeNode(Node node){
+    private void initializeNode(Node node) {
         List<Node> nodeList = node.getActiveNodes();
         nodeList.add(this);
         nodeList.sort(new NodeComparator());
@@ -34,9 +35,7 @@ public class Node {
         this.updateOthers(nodeList);
     }
 
-    private void updateOthers(List<Node> list) {
-        list.forEach(node -> node.updateFingerTable(list));
-    }
+    private void updateOthers(List<Node> list) { list.forEach(node -> node.updateFingerTable(list)); }
 
     private void updateFingerTable(List<Node> list) {
         this.initFingerTable(list);
@@ -84,7 +83,7 @@ public class Node {
         return list.get(0);
     }
 
-    public List<Node> getActiveNodes(){
+    private List<Node> getActiveNodes(){
         List<Node> list = new ArrayList<>();
 
         Node temp = this;
