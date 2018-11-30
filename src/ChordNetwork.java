@@ -1,3 +1,7 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class ChordNetwork {
 
     public static void main(String[] args) {
@@ -41,27 +45,48 @@ public class ChordNetwork {
         Node node1 = new Node(1);
         Node node3 = new Node(3);
 
+        ArrayList<Integer> keys0 = new ArrayList<>();
+        keys0.add(0);
+        keys0.add(1);
+        keys0.add(2);
+        keys0.add(3);
+        keys0.add(4);
+        keys0.add(5);
+        keys0.add(6);
+        keys0.add(7);
+
+        node0.setKeys(keys0);
+
         node0.join(null);
         node1.join(node0);
         node3.join(node1);
 
-        node0.getFingerTable().prettyPrint();
-        node1.getFingerTable().prettyPrint();
-        node3.getFingerTable().prettyPrint();
 
-        System.out.println("Now node 6 joins. Let's see the finger tables again.");
+//        node0.getFingerTable().prettyPrint();
+//        node1.getFingerTable().prettyPrint();
+//        node3.getFingerTable().prettyPrint();
+
+//        System.out.println("Now node 6 joins. Let's see the finger tables again.");
 
         Node node6 = new Node(6);
         node6.join(node3);
 
-        node0.getFingerTable().prettyPrint();
-        node1.getFingerTable().prettyPrint();
-        node3.getFingerTable().prettyPrint();
-        node6.getFingerTable().prettyPrint();
+//        node0.getFingerTable().prettyPrint();
+//        node1.getFingerTable().prettyPrint();
+//        node3.getFingerTable().prettyPrint();
+//        node6.getFingerTable().prettyPrint();
 
-        Node node5 = new Node(5);
-        node5.join(node3);
+        System.out.println("Printing new keys in Node 6");
+        node6.getKeys().forEach(key -> System.out.println(key));
 
-        node5.getFingerTable().prettyPrint();
+        System.out.println("Printing new keys in Node 0");
+        node0.getKeys().forEach(key -> System.out.println(key));
+
+        System.out.println("Printing new keys in Node 1");
+        node1.getKeys().forEach(key -> System.out.println(key));
+
+        System.out.println("Printing new keys in Node 3");
+        node3.getKeys().forEach(key -> System.out.println(key));
+
     }
 }
