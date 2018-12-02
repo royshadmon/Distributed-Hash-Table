@@ -1,92 +1,90 @@
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class ChordNetwork {
 
     public static void main(String[] args) {
 //
 //        // Testing findSuccessor, findPredecessor and closestPrecedingFinger
-//        Node node0 = new Node(0);
-//        FingerTable ftable0 = new FingerTable(node0.getId());
-//        Node node1 = new Node(1);
-//        FingerTable ftable1 = new FingerTable(node1.getId());
-//        Node node3 = new Node(3);
-//        FingerTable ftable3 = new FingerTable(node3.getId());
+//        OldNode oldNode0 = new OldNode(0);
+//        OldFingerTable ftable0 = new OldFingerTable(oldNode0.getId());
+//        OldNode oldNode1 = new OldNode(1);
+//        OldFingerTable ftable1 = new OldFingerTable(oldNode1.getId());
+//        OldNode oldNode3 = new OldNode(3);
+//        OldFingerTable ftable3 = new OldFingerTable(oldNode3.getId());
 //
-//        ftable0.put(1, node1);
-//        ftable0.put(2, node3);
-//        ftable0.put(3, node0);
+//        ftable0.put(1, oldNode1);
+//        ftable0.put(2, oldNode3);
+//        ftable0.put(3, oldNode0);
 //
-//        ftable1.put(1, node3);
-//        ftable1.put(2, node3);
-//        ftable1.put(3, node0);
+//        ftable1.put(1, oldNode3);
+//        ftable1.put(2, oldNode3);
+//        ftable1.put(3, oldNode0);
 //
-//        ftable3.put(1, node0);
-//        ftable3.put(2, node0);
-//        ftable3.put(3, node0);
+//        ftable3.put(1, oldNode0);
+//        ftable3.put(2, oldNode0);
+//        ftable3.put(3, oldNode0);
 //
 //        ftable0.prettyPrint();
 //        ftable1.prettyPrint();
 //        ftable3.prettyPrint();
 //
-//        node0.setFingerTable(ftable0);
-//        node1.setFingerTable(ftable1);
-//        node3.setFingerTable(ftable3);
+//        oldNode0.setFingerTable(ftable0);
+//        oldNode1.setFingerTable(ftable1);
+//        oldNode3.setFingerTable(ftable3);
 //
-//        Node node6 = new Node(6);
-//        node6.join(node3);
+//        OldNode oldNode6 = new OldNode(6);
+//        oldNode6.join(oldNode3);
 //
-//        node0.getFingerTable().prettyPrint();
-//        node1.getFingerTable().prettyPrint();
-//        node3.getFingerTable().prettyPrint();
+//        oldNode0.getFingerTable().prettyPrint();
+//        oldNode1.getFingerTable().prettyPrint();
+//        oldNode3.getFingerTable().prettyPrint();
 
-        Node node0 = new Node(0);
-        Node node1 = new Node(1);
-        Node node3 = new Node(3);
+        OldNode oldNode0 = new OldNode(0);
+        OldNode oldNode1 = new OldNode(1);
+        OldNode oldNode3 = new OldNode(3);
 
         ArrayList<Integer> keys0 = new ArrayList<>();
-        keys0.add(0);
-        keys0.add(1);
-        keys0.add(2);
-        keys0.add(3);
-        keys0.add(4);
-        keys0.add(5);
-        keys0.add(6);
         keys0.add(7);
+        keys0.add(3);
+        keys0.add(2);
+        keys0.add(1);
+        keys0.add(4);
+        keys0.add(0);
+        keys0.add(6);
+        keys0.add(5);
 
-        node0.setKeys(keys0);
+        oldNode0.setKeys(keys0);
 
-        node0.join(null);
-        node1.join(node0);
-        node3.join(node1);
+        oldNode0.join(null);
+        oldNode1.join(oldNode0);
+        oldNode3.join(oldNode1);
 
 
-//        node0.getFingerTable().prettyPrint();
-//        node1.getFingerTable().prettyPrint();
-//        node3.getFingerTable().prettyPrint();
+//        oldNode0.getFingerTable().prettyPrint();
+//        oldNode1.getFingerTable().prettyPrint();
+//        oldNode3.getFingerTable().prettyPrint();
 
 //        System.out.println("Now node 6 joins. Let's see the finger tables again.");
 
-        Node node6 = new Node(6);
-        node6.join(node3);
+        OldNode oldNode6 = new OldNode(6);
+        oldNode6.join(oldNode3);
 
-//        node0.getFingerTable().prettyPrint();
-//        node1.getFingerTable().prettyPrint();
-//        node3.getFingerTable().prettyPrint();
-//        node6.getFingerTable().prettyPrint();
+//        oldNode0.getFingerTable().prettyPrint();
+//        oldNode1.getFingerTable().prettyPrint();
+//        oldNode3.getFingerTable().prettyPrint();
+//        oldNode6.getFingerTable().prettyPrint();
 
-        System.out.println("Printing new keys in Node 6");
-        node6.getKeys().forEach(key -> System.out.println(key));
+        System.out.println("Printing new keys in OldNode 6");
+        oldNode6.getKeys().forEach(key -> System.out.println(key));
 
-        System.out.println("Printing new keys in Node 0");
-        node0.getKeys().forEach(key -> System.out.println(key));
+        System.out.println("Printing new keys in OldNode 0");
+        oldNode0.getKeys().forEach(key -> System.out.println(key));
 
-        System.out.println("Printing new keys in Node 1");
-        node1.getKeys().forEach(key -> System.out.println(key));
+        System.out.println("Printing new keys in OldNode 1");
+        oldNode1.getKeys().forEach(key -> System.out.println(key));
 
-        System.out.println("Printing new keys in Node 3");
-        node3.getKeys().forEach(key -> System.out.println(key));
+        System.out.println("Printing new keys in OldNode 3");
+        oldNode3.getKeys().forEach(key -> System.out.println(key));
 
     }
 }

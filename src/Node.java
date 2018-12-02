@@ -1,159 +1,167 @@
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class Node {
 
     private int nodeId;
+    private Node predecessor;
     private FingerTable table;
-    private static int m = FingerTable.MAX_ENTRIES;
-
     private List<Integer> keys;
 
-    Node(int id) {
-        this.nodeId = hash(id);
-        this.table = new FingerTable(this.nodeId);
+    Node (int nodeId) {
+        this.nodeId = hash(nodeId);
+        this.table = new FingerTable(nodeId);
         this.keys = new ArrayList<>();
+        this.predecessor = null;
     }
 
-    public void join(Node node) {
+    public int getId() {
+        return this.nodeId;
+    }
+
+    public FingerTable getFingerTable() {
+        return this.table;
+    }
+
+    public List<Integer> getKeys() {
+        return this.keys;
+    }
+
+    private void join(Node node) {
+
+        System.out.println("Node " + this.getId() + "is joining");
         if (node == null) {
-            System.out.println("Initialized Network");
-            System.out.println("Node " + this.getId() + " has joined");
-            System.out.println("----------------------");
             this.initNetwork();
-        }
-        else {
-            this.initializeNode(node);
-            System.out.println("Node " + this.getId() + " has joined");
-            System.out.println("Migrating keys to node " + this.getId());
-            System.out.println();
-
-            this.migrateKeys();
+        } else {
+            this.initFingerTable(node);
         }
     }
 
-    private void migrateKeys() {
-        // 1. This function should find the successor of the node, from the finger table,
-        // 2. Update the successor's key set to remove keys it should no longer manage.
-        // 3. Add those keys to this node's key set
+    private void initFingerTable(Node node) {
+        this.getFingerTable().put(1, node.findSuccessor(computeStart(1)));
+        this.predecessor = this.getSuccessor().predecessor;
+        this.getSuccessor().predecessor = this;
 
-        // Should work even when there are no keys in the system
-
-        List<Integer> newKeys = this.getSuccessor().updateKeys(this.getId());
-        System.out.println("Adding them to new node " + this.getId());
-        this.getKeys().addAll(newKeys);
-        System.out.println("----------------------");
-        System.out.println();
-    }
-
-    private List<Integer> updateKeys(int ID) {
-        System.out.println("Updating keys of Node " + this.getId());
-        System.out.println();
-        List<Integer> removedKeys = new ArrayList<>();
-
-        for (int i=0; i < this.getKeys().size(); i++) {
-            /* if the key is less than or equal to the ID, but not equal to the current node's ID,
-             it should be removed from this node's keyset */
-            int key = this.getKeys().get(i);
-            if (key <= ID && key !=this.getId()) {
-                System.out.println("Removing key with ID: " + key);
-                removedKeys.add(key);
-                this.getKeys().remove(i);
-                i--;
+        for (int i = 1; i <= FingerTable.MAX_ENTRIES - 1; i++) {
+            if (inInterval(this.getId(), computeStart(i+1), this.getFingerTable().get(i).getId())) {
+                this.getFingerTable().put(i+1, this.getFingerTable().get(i));
+            } else {
+                this.getFingerTable().put(i+1, node.findSuccessor(computeStart(i+1)));
             }
-
         }
-        return removedKeys;
     }
 
-    private void initializeNode(Node node) {
-        List<Node> nodeList = node.getActiveNodes();
-        nodeList.add(this);
-        nodeList.sort(new NodeComparator());
 
-        this.initFingerTable(nodeList);
-        this.updateOthers(nodeList);
-    }
-
-    private void updateOthers(List<Node> list) { list.forEach(node -> node.updateFingerTable(list)); }
-
-    private void updateFingerTable(List<Node> list) {
-        this.initFingerTable(list);
-    }
-
-    private void initFingerTable(List<Node> list) {
-        for (int i =1; i <= m; i++) {
-            int val = FingerTable.hash(this.nodeId, i);
-            Node successor = this.findSuccessor(val, list);
-            this.table.put(i, successor);
-        }
-//        this.table.prettyPrint(); // Need this in final submission but commented out for debugging
-    }
-
-    private Node findSuccessor(int val, List<Node> list) {
-        for (int i = 0; i < list.size() - 1; i++) {
-            if (list.get(i).getId() == val) return list.get(i); // May not need this condition
-            if (list.get(i).getId() < val && val <= list.get(i+1).getId()) return list.get(i+1);
-        }
-        return list.get(0);
-    }
-
-    private List<Node> getActiveNodes(){
-        List<Node> list = new ArrayList<>();
-
-        Node temp = this;
-        while (temp.getSuccessor() != this) {
-            list.add(temp);
-            temp = temp.getSuccessor();
-        }
-        list.add(temp);
-
-        list.sort(new NodeComparator()); //
-
-        return list;
-    }
-
-    // initialize Finger Table of first node joining the network
     private void initNetwork() {
-        for (int i = 1; i <= m; i++) {
-            this.table.put(i, this);
+        for (int i = 1; i <= FingerTable.MAX_ENTRIES; i++) {
+            this.getFingerTable().put(i, this);
+        }
+
+        this.predecessor = this;
+    }
+
+    private Node findSuccessor(int id) {
+        if (this.getId() == id) return this;
+        else return this.findPredecessor(id).getSuccessor();
+    }
+
+    private Node findPredecessor(int id) {
+        Node predecessor = this;
+
+//        if (this.getSuccessor() == this) return this; // This means that I am the only node in the network
+//
+//        if (predecessor.getId() == id) {
+//            return predecessor.getSuccessor().findPredecessor(id);
+//        }
+
+        while (!inInterval(predecessor.getId(), id, predecessor.getSuccessor().getId() + 1)) {
+            Node temp = predecessor.findClosestPrecedingFinger(id);
+
+            if (predecessor.getId() == temp.getId()) {
+                return this.predecessor;
+            }
+            predecessor = temp;
+        }
+        return predecessor;
+    }
+
+    private Node findClosestPrecedingFinger(int nodeId) {
+        for (int i = FingerTable.MAX_ENTRIES; i >= 1 ; i--) {
+            Node node = this.getFingerTable().get(i);
+
+            if (inInterval(this.getId(), node.getId(), nodeId)) {
+                return node;
+            }
+        }
+
+        return this;
+    }
+
+    private Node getSuccessor() {
+        return this.getFingerTable().get(1);
+    }
+
+    private int computeStart(int entry) { return (this.getId() + (int) Math.pow(2, entry)) % FingerTable.MOD; }
+
+    private void prettyPrint() {
+        this.table.prettyPrint();
+    }
+
+    /************************************************************************************************
+     MAIN METHOD
+     ***********************************************************************************************/
+
+    public static void main(String[] args) {
+        Node node0 = new Node(0);
+        Node node1 = new Node(1);
+        Node node3 = new Node(3);
+
+        node0.predecessor = node0;
+//        node1.predecessor = node0;
+//        node3.predecessor = node1;
+
+        node0.table.put(1, node0);
+        node0.table.put(2, node0);
+        node0.table.put(3, node0);
+
+        node1.initFingerTable(node0);
+
+        for (int i = 1; i <= FingerTable.MAX_ENTRIES; i++) {
+
+            int id = (node1.getId() - (int) Math.pow(2, i - 1));
+
+            id = (id + 8) % 8;
+
+            Node p = node1.findPredecessor(id);
+            System.out.println(p.getId());
+            p.updateFingerTable(node1, i);
+        }
+
+        node0.prettyPrint();
+        node1.prettyPrint();
+
+
+
+    }
+
+    private void updateFingerTable(Node node, int i) {
+        if (inInterval(this.getId(), node.getId()+1, this.getFingerTable().get(i).getId())) {
+            this.getFingerTable().put(i, node);
+            Node p = this.predecessor;
+            p.updateFingerTable(node, i);
         }
     }
 
     /************************************************************************************************
-
-       GETTERS AND SETTERS
-
+     PRIVATE STATIC HELPER FUNCTIONS
      ***********************************************************************************************/
 
-    public int getId() { return this.nodeId; }
+    private static int hash(int number) { return number & 0xff; }
 
-    public void setId(int id) { this.nodeId = id; }
+    private static boolean inInterval(int start, int nodeId, int end) {
+        if (start == end) return false;
 
-    public FingerTable getFingerTable() { return this.table; }
-
-    public void setFingerTable(FingerTable fingerTable) { this.table = fingerTable; }
-
-    public List<Integer> getKeys() { return keys; }
-
-    public void setKeys(List<Integer> keys) { this.keys = keys; }
-
-
-    /************************************************************************************************
-
-     PRIVATE METHODS
-
-     ***********************************************************************************************/
-
-    private Node getSuccessor() { return this.table.get(1); }
-
-    private int hash(int number) { return number & 0xff; }
-
-    class NodeComparator implements Comparator<Node> {
-        public int compare(Node a, Node b) {
-            return a.getId() - b.getId();
-        }
+        if (start > end) return (start < nodeId || nodeId < end);
+        else return start < nodeId && nodeId < end;
     }
 }

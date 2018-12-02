@@ -1,11 +1,11 @@
 public class NodeJoin {
 
     public static void main(String[] args) {
-        Node node1 = new Node(1);
-        Node node2 = new Node(2);
+        OldNode oldNode1 = new OldNode(1);
+        OldNode oldNode2 = new OldNode(2);
 
-        node1.join(null);
-        //node1.getFingerTable().prettyPrint();
-        node2.join(node1);
+        oldNode1.join(null);
+        //oldNode1.getFingerTable().prettyPrint();
+        oldNode2.join(oldNode1);
     }
 }
