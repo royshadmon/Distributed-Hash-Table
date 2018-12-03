@@ -1,4 +1,4 @@
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 class FingerTable {
     private int hostNodeId;
@@ -6,7 +6,7 @@ class FingerTable {
     static final int MAX_ENTRIES = 3;
 
     static final int MOD = (int) (Math.pow(2, MAX_ENTRIES));
-    private HashMap<Integer, Node> fingerTable = new HashMap<>();
+    private LinkedHashMap<Integer, Node> fingerTable = new LinkedHashMap<>();
 
     FingerTable(Integer hostNodeId) {
         this.hostNodeId = hostNodeId;
