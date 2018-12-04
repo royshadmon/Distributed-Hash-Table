@@ -17,7 +17,7 @@ class FingerTable {
         if (entryNumber > MAX_ENTRIES) throw new RuntimeException("Exceeded number of entries. " +
                 "Only " + MAX_ENTRIES + " entries are allowed.");
 
-        Integer key = hash(entryNumber);
+        Integer key = computeStart(entryNumber);
         return this.fingerTable.get(key);
     }
 
@@ -26,7 +26,7 @@ class FingerTable {
         if (entryNumber > MAX_ENTRIES) throw new RuntimeException("Exceeded number of entries. " +
                 "Only " + MAX_ENTRIES + " entries are allowed.");
 
-        Integer key = hash(entryNumber);
+        Integer key = computeStart(entryNumber);
         this.fingerTable.put(key, node);
     }
 
@@ -41,14 +41,14 @@ class FingerTable {
         System.out.println("----------------------");
     }
 
-    private Integer hash(Integer entryNumber) {
+    private Integer computeStart(Integer entryNumber) {
         int index = this.hostNodeId + (int) ((Math.pow(2, entryNumber - 1)));
         index = index % MOD;
         return index;
 
     }
 
-    static Integer hash(int hostNodeId, int entryNumber) {
+    static Integer computeStart(int hostNodeId, int entryNumber) {
         int index = hostNodeId + (int) ((Math.pow(2, entryNumber - 1)));
         index = index % MOD;
         return index;
@@ -57,7 +57,7 @@ class FingerTable {
     public static void main(String[] args) {
         FingerTable f = new FingerTable(0);
 
-        System.out.println(f.hash(3));
+        System.out.println(f.computeStart(3));
         int ent1 = 3;
         int ent2 = 2;
         System.out.println(ent1 % Math.pow(2, MAX_ENTRIES));
