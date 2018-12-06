@@ -28,57 +28,14 @@ public class Node {
     }
 
     private void join(Node node) {
-        System.out.println("Node "+ this + "is joining");
-        if (node == null) {
-            this.initNetwork();
-        } else {
-            boolean loneNodeMode = this.initFingerTable(node);
-            if (loneNodeMode)
-                this.updateOthers(node);
-            else
-                this.updateOthers(null);
-        }
-    }
-
-    private boolean updateOthers(Node loneNode) {
-        if (loneNode != null) {
-            // The node provided is the only other node in the network
-            this.loneNodeUpdate(loneNode);
-            System.out.println("Exiting Lone Node State");
-            return true;
-
-        } else {
-            // There's more than one other node in the network
+        if (node == null) this.initNetwork();
+        else {
+            this.initFingerTable(node);
             this.update_others();
-            for (int i = 1; i <= FingerTable.MAX_ENTRIES ; i++) {
-//                System.out.println(this.findPredecessor(this.computeUpdateIndex(i-1)));
-            }
-
-            return false;
-        }
-
-    }
-
-    private void loneNodeUpdate(Node loneNode) {
-        for (int i = 1; i <= FingerTable.MAX_ENTRIES; i++) {
-            int start = loneNode.computeStart(i);
-
-            if (inInterval(loneNode.getId(), start, this.getId() + 1)) {
-                loneNode.put(i, this);
-            } else {
-                loneNode.put(i, loneNode);
-            }
         }
     }
 
-    private boolean initFingerTable(Node node) {
-
-        if (node.predecessor.getId() == node.getId()) {
-            System.out.println(node +" is the Lone node in the network");
-            this.loneStateInit(node);
-
-            return true;
-        }
+    private void initFingerTable(Node node) {
 
         this.put(1, node.findSuccessor(computeStart(1)));
 
@@ -86,35 +43,19 @@ public class Node {
         this.getSuccessor().predecessor = this;
 
         for (int i = 2; i <= FingerTable.MAX_ENTRIES; i++) {
-            if (inInterval(this.getId() + 1, computeStart(i), this.get(i-1).getId())) {
+            if (inLeftIncludedInterval(this.getId(), computeStart(i), this.get(i-1).getId())) {
                 this.put(i, this.getFingerTable().get(i-1));
             } else {
                 this.put(i, node.findSuccessor(computeStart(i)));
             }
         }
-
-        return false;
-    }
-
-    private void loneStateInit(Node loneNode) {
-        for (int i = 1; i <= FingerTable.MAX_ENTRIES; i++) {
-            if (inInterval(loneNode.getId(), this.computeStart(i), this.getId()))
-                this.put(i, this);
-            else
-                this.put(i, loneNode);
-        }
-
-        this.predecessor = loneNode;
-        loneNode.predecessor = this;
     }
 
     public void update_others() {
         for (int i = 1; i <= FingerTable.MAX_ENTRIES; i++) {
             int updateIndex = computeUpdateIndex(i-1);
-            System.out.println("compute upate index " + computeUpdateIndex(i-1));
-            Node pred;
 
-            pred = this.findPredecessor(updateIndex);
+            Node pred = this.findPredecessor(updateIndex);
 
             if (pred.getSuccessor().getId() == updateIndex) pred = pred.getSuccessor();
 
@@ -124,11 +65,13 @@ public class Node {
     }
 
     private void update_finger_table(Node node, int i) {
-        if (inInterval(this.getId() + 1, node.getId(), this.getFingerTable().get(i).getId())) {
+        if (node.getId() == this.getId()) return;
+        if (inLeftIncludedInterval(this.getId(), node.getId(), this.getFingerTable().get(i).getId())) {
             this.getFingerTable().put(i, node);
             Node pred = this.predecessor;
             pred.update_finger_table(node, i);
-        } else if (this.computeStart(i) == node.nodeId) {
+        }
+        else if (this.computeStart(i) == node.nodeId) {
             this.getFingerTable().put(i, node);
             Node pred = this.predecessor;
             pred.update_finger_table(node, i);
@@ -136,7 +79,6 @@ public class Node {
     }
 
     private void initNetwork() {
-        System.out.println("Network is entering Lone Node State");
         for (int i = 1; i <= FingerTable.MAX_ENTRIES; i++) {
             this.getFingerTable().put(i, this);
         }
@@ -152,25 +94,25 @@ public class Node {
 
         Node predecessor = this;
 
-        while (!inInterval(predecessor.getId(), id, predecessor.getSuccessor().getId() + 1)) {
+        while (!inRightIncludedInterval(predecessor.getId(), id, predecessor.getSuccessor().getId())) {
             Node temp = predecessor.findClosestPrecedingFinger(id);
 
+//            if (predecessor.getSuccessor().getId() == temp.predecessor.getId()) {
+//                return temp;
+//            }
 
-            if (predecessor.getId() == temp.getId()) {
-//                break;
-                return temp.predecessor; //break
-            }
 
             predecessor = temp;
         }
         return predecessor;
     }
 
-    private Node findClosestPrecedingFinger(int nodeId) {
+    private Node findClosestPrecedingFinger(int id) {
+
         for (int i = FingerTable.MAX_ENTRIES; i >= 1 ; i--) {
             Node node = this.getFingerTable().get(i);
 
-            if (inInterval(this.getId(), node.getId(), nodeId)) {
+            if (inOpenInterval(this.getId(), node.getId(), id)) {
                 return node;
             }
         }
@@ -195,7 +137,6 @@ public class Node {
         int result = this.getId() - (int) Math.pow(2, index) + FingerTable.MOD;
         result = result % FingerTable.MOD;
         return result;
-        //return ((this.getId() - (int) Math.pow(2, index)) + FingerTable.MOD) % FingerTable.MOD;
     }
 
     private void prettyPrint() {
@@ -222,23 +163,35 @@ public class Node {
         Node node0 = new Node(7);
         node0.join(null);
 
-        Node node2 = new Node(0);
-        node2.join(node0);
+        Node node1 = new Node(6);
+        node1.join(node0);
 
-        Node node4 = new Node(2);
-        node4.join(node2);
-//        System.out.println(node0.findSuccessor(node4.computeStart(1)));
+        Node node2 = new Node(5);
+        node2.join(node1);
 
-        Node node5 = new Node(1);
+        Node node3 = new Node(4);
+        node3.join(node2);
+
+        Node node4 = new Node(3);
+        node4.join(node3);
+
+        Node node5 = new Node(2);
         node5.join(node4);
 
-        System.out.println(node2.findSuccessor(node5.computeStart(1)));
+        Node node6 = new Node(1);
+        node6.join(node5);
+
+        Node node7 = new Node(0);
+        node7.join(node6);
 
         node0.prettyPrint();
+        node1.prettyPrint();
         node2.prettyPrint();
+        node3.prettyPrint();
         node4.prettyPrint();
         node5.prettyPrint();
-
+        node6.prettyPrint();
+        node7.prettyPrint();
     }
 
     /************************************************************************************************
@@ -247,10 +200,32 @@ public class Node {
 
     private static int hash(int number) { return number & 0xff; }
 
-    private static boolean inInterval(int start, int nodeId, int end) {
-        //if (start == end) return false;
+//    private static boolean inInterval(int a, int c, int b) {
+//        //if (a == b) return false;
+//
+//        if (a > b) return (a < c || c < b);
+//        else return a < c && c < b;
+//    }
 
-        if (start > end) return (start < nodeId || nodeId < end);
-        else return start < nodeId && nodeId < end;
+    private static boolean _inInterval(int a, int c, int b) {
+
+        a = a % FingerTable.MOD;
+        b = b % FingerTable.MOD;
+        c = c % FingerTable.MOD;
+
+        if (a <= b) return (a <= c && c <= b);
+        else return a <= c || c <= b;
+    }
+
+    private static boolean inOpenInterval(int a, int c, int b) {
+        return _inInterval(a+1, c,b-1);
+    }
+
+    private static boolean inLeftIncludedInterval(int a, int c, int b) {
+        return _inInterval(a, c, b-1);
+    }
+
+    private static boolean inRightIncludedInterval(int a, int c, int b) {
+        return _inInterval(a+1, c, b);
     }
 }
