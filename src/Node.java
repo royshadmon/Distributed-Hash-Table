@@ -37,16 +37,32 @@ public class Node {
 
     private void initFingerTable(Node node) {
 
-        this.put(1, node.findSuccessor(computeStart(1)));
+        this.put(1, node.findSuccessor(this.computeStart(1)));
 
         this.predecessor = this.getSuccessor().predecessor;
         this.getSuccessor().predecessor = this;
 
         for (int i = 2; i <= FingerTable.MAX_ENTRIES; i++) {
-            if (inLeftIncludedInterval(this.getId(), computeStart(i), this.get(i-1).getId())) {
+            if (inLeftIncludedInterval(this.getId(), this.computeStart(i), this.get(i-1).getId())) {
+                System.out.println("First");
                 this.put(i, this.getFingerTable().get(i-1));
             } else {
-                this.put(i, node.findSuccessor(computeStart(i)));
+                System.out.println("Second");
+
+                Node succ = node.findSuccessor(this.computeStart(i));
+                if (_inInterval(computeStart(i), this.getId(), succ.getId())) {
+                    this.put(i, this);
+                }
+                else {
+                    this.put(i, succ);
+                }
+
+//                if (node.getSuccessor().nodeId == node.getId()) {
+//                    this.put(i, this);
+//                }
+//                else {
+//                    this.put(i, node.findSuccessor(this.computeStart(i)));
+//                }
             }
         }
     }
@@ -67,11 +83,13 @@ public class Node {
     private void update_finger_table(Node node, int i) {
         if (node.getId() == this.getId()) return;
         if (inLeftIncludedInterval(this.getId(), node.getId(), this.getFingerTable().get(i).getId())) {
+            System.out.println("Node " + this.getId() + " is getting updated and its precedessor is " + node.getId());
             this.getFingerTable().put(i, node);
             Node pred = this.predecessor;
             pred.update_finger_table(node, i);
         }
         else if (this.computeStart(i) == node.nodeId) {
+            System.out.println("Node " + this.getId() + " is getting updated with node " + node.getId());
             this.getFingerTable().put(i, node);
             Node pred = this.predecessor;
             pred.update_finger_table(node, i);
@@ -160,29 +178,39 @@ public class Node {
      ***********************************************************************************************/
 
     public static void main(String[] args) {
-        Node node0 = new Node(7);
+        Node node0 = new Node(0);
         node0.join(null);
 
-        Node node1 = new Node(6);
+        Node node1 = new Node(2);
+//        System.out.println(node0.findSuccessor(10));
         node1.join(node0);
 
-        Node node2 = new Node(5);
+//        System.out.println(node0.findSuccessor(8).getId());
+
+        Node node2 = new Node(4);
         node2.join(node1);
 
-        Node node3 = new Node(4);
+        Node node3 = new Node(8);
         node3.join(node2);
 
-        Node node4 = new Node(3);
+        Node node4 = new Node(16);
         node4.join(node3);
 
-        Node node5 = new Node(2);
+        Node node5 = new Node(32);
         node5.join(node4);
 
-        Node node6 = new Node(1);
+        Node node6 = new Node(67);
         node6.join(node5);
 
-        Node node7 = new Node(0);
+        Node node7 = new Node(128);
         node7.join(node6);
+
+        Node node8 = new Node(129);
+        node8.join(node0);
+
+        Node node9 = new Node(255);
+        node9.join(node7);
+
 
         node0.prettyPrint();
         node1.prettyPrint();
@@ -192,6 +220,8 @@ public class Node {
         node5.prettyPrint();
         node6.prettyPrint();
         node7.prettyPrint();
+        node8.prettyPrint();
+        node9.prettyPrint();
     }
 
     /************************************************************************************************

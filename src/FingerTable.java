@@ -3,7 +3,7 @@ import java.util.LinkedHashMap;
 class FingerTable {
     private int hostNodeId;
 
-    static final int MAX_ENTRIES = 3;
+    static final int MAX_ENTRIES = 8;
 
     static final int MOD = (int) (Math.pow(2, MAX_ENTRIES));
     private LinkedHashMap<Integer, Node> fingerTable = new LinkedHashMap<>();
