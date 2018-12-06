@@ -31,7 +31,8 @@ public class Node {
         if (node == null) this.initNetwork();
         else {
             this.initFingerTable(node);
-            this.update_others();
+            this.updateOthers();
+            this.migrateKeys();
         }
     }
 
@@ -43,31 +44,21 @@ public class Node {
         this.getSuccessor().predecessor = this;
 
         for (int i = 2; i <= FingerTable.MAX_ENTRIES; i++) {
-            if (inLeftIncludedInterval(this.getId(), this.computeStart(i), this.get(i-1).getId())) {
-                System.out.println("First");
+            if (inLeftIncludedInterval(this.getId(), this.computeStart(i), this.get(i-1).getId()))
                 this.put(i, this.getFingerTable().get(i-1));
-            } else {
-                System.out.println("Second");
 
-                Node succ = node.findSuccessor(this.computeStart(i));
-                if (_inInterval(computeStart(i), this.getId(), succ.getId())) {
+            else {
+                Node successor = node.findSuccessor(this.computeStart(i));
+
+                if (inClosedInterval(this.computeStart(i), this.getId(), successor.getId()))
                     this.put(i, this);
-                }
-                else {
-                    this.put(i, succ);
-                }
-
-//                if (node.getSuccessor().nodeId == node.getId()) {
-//                    this.put(i, this);
-//                }
-//                else {
-//                    this.put(i, node.findSuccessor(this.computeStart(i)));
-//                }
+                else
+                    this.put(i, successor);
             }
         }
     }
 
-    public void update_others() {
+    public void updateOthers() {
         for (int i = 1; i <= FingerTable.MAX_ENTRIES; i++) {
             int updateIndex = computeUpdateIndex(i-1);
 
@@ -75,24 +66,24 @@ public class Node {
 
             if (pred.getSuccessor().getId() == updateIndex) pred = pred.getSuccessor();
 
-            pred.update_finger_table(this, i);
+            pred.updateFingerTable(this, i);
 
         }
     }
 
-    private void update_finger_table(Node node, int i) {
+    private void updateFingerTable(Node node, int i) {
         if (node.getId() == this.getId()) return;
         if (inLeftIncludedInterval(this.getId(), node.getId(), this.getFingerTable().get(i).getId())) {
-            System.out.println("Node " + this.getId() + " is getting updated and its precedessor is " + node.getId());
+//            System.out.println("Node " + this.getId() + " is getting updated and its precedessor is " + node.getId());
             this.getFingerTable().put(i, node);
             Node pred = this.predecessor;
-            pred.update_finger_table(node, i);
+            pred.updateFingerTable(node, i);
         }
         else if (this.computeStart(i) == node.nodeId) {
-            System.out.println("Node " + this.getId() + " is getting updated with node " + node.getId());
+//            System.out.println("Node " + this.getId() + " is getting updated with node " + node.getId());
             this.getFingerTable().put(i, node);
             Node pred = this.predecessor;
-            pred.update_finger_table(node, i);
+            pred.updateFingerTable(node, i);
         }
     }
 
@@ -104,6 +95,10 @@ public class Node {
         this.predecessor = this;
     }
 
+    /************************************************************************************************
+     BASIC FOUNDATIONAL METHODS
+     ***********************************************************************************************/
+
     private Node findSuccessor(int id) {
         return this.findPredecessor(id).getSuccessor();
     }
@@ -114,11 +109,6 @@ public class Node {
 
         while (!inRightIncludedInterval(predecessor.getId(), id, predecessor.getSuccessor().getId())) {
             Node temp = predecessor.findClosestPrecedingFinger(id);
-
-//            if (predecessor.getSuccessor().getId() == temp.predecessor.getId()) {
-//                return temp;
-//            }
-
 
             predecessor = temp;
         }
@@ -138,10 +128,53 @@ public class Node {
         return this;
     }
 
+    /************************************************************************************************
+     KEY METHODS
+     ***********************************************************************************************/
+
     private void insert (int keyId) {
         int key = hash(keyId);
-        Node node = findSuccessor(key);
+        Node node = this.findSuccessor(key);
         node.getKeys().add(key);
+    }
+
+    private void migrateKeys() {
+        // 1. This function should find the successor of the node, from the finger table,
+        // 2. Update the successor's key set to remove keys it should no longer manage.
+        // 3. Add those keys to this node's key set
+
+        // Should work even when there are no keys in the system
+
+        List<Integer> newKeys = this.getSuccessor().updateKeys(this.getId());
+
+        if (newKeys.size() != 0) {
+            System.out.println("Adding them to new node " + this.getId());
+            this.getKeys().addAll(newKeys);
+            System.out.println("----------------------");
+            System.out.println();
+        }
+    }
+
+    private List<Integer> updateKeys(int id) {
+        List<Integer> removedKeys = new ArrayList<>();
+
+        for (int i=0; i < this.getKeys().size(); i++) {
+            /* if the key is less than or equal to the id, but not equal to the current node's id,
+             it should be removed from this node's keyset */
+            int key = this.getKeys().get(i);
+
+            if (key <= id && key !=this.getId()) {
+                System.out.println("Updating keys of Node " + this.getId());
+                System.out.println();
+                System.out.println("Removing key with id: " + key);
+
+                removedKeys.add(key);
+                this.getKeys().remove(i);
+                i--;
+            }
+        }
+
+        return removedKeys;
     }
 
 
@@ -184,14 +217,13 @@ public class Node {
      ***********************************************************************************************/
 
     public static void main(String[] args) {
-        Node node0 = new Node(0);
+        Node node0 = new Node(255);
         node0.join(null);
 
-        Node node1 = new Node(2);
-//        System.out.println(node0.findSuccessor(10));
-        node1.join(node0);
+        node0.insert(0);
 
-//        System.out.println(node0.findSuccessor(8).getId());
+        Node node1 = new Node(2);
+        node1.join(node0);
 
         Node node2 = new Node(4);
         node2.join(node1);
@@ -217,7 +249,6 @@ public class Node {
         Node node9 = new Node(254);
         node9.join(node7);
 
-
         node0.prettyPrint();
         node1.prettyPrint();
         node2.prettyPrint();
@@ -230,7 +261,9 @@ public class Node {
         node9.prettyPrint();
 
         node5.insert(255);
+
         System.out.println(node0.getKeys().get(0));
+        System.out.println(node1.getKeys().get(0));
     }
 
     /************************************************************************************************
@@ -239,14 +272,7 @@ public class Node {
 
     private static int hash(int number) { return number & 0xff; }
 
-//    private static boolean inInterval(int a, int c, int b) {
-//        //if (a == b) return false;
-//
-//        if (a > b) return (a < c || c < b);
-//        else return a < c && c < b;
-//    }
-
-    private static boolean _inInterval(int a, int c, int b) {
+    private static boolean inClosedInterval(int a, int c, int b) {
 
         a = a % FingerTable.MOD;
         b = b % FingerTable.MOD;
@@ -257,14 +283,14 @@ public class Node {
     }
 
     private static boolean inOpenInterval(int a, int c, int b) {
-        return _inInterval(a+1, c,b-1);
+        return inClosedInterval(a+1, c,b-1);
     }
 
     private static boolean inLeftIncludedInterval(int a, int c, int b) {
-        return _inInterval(a, c, b-1);
+        return inClosedInterval(a, c, b-1);
     }
 
     private static boolean inRightIncludedInterval(int a, int c, int b) {
-        return _inInterval(a+1, c, b);
+        return inClosedInterval(a+1, c, b);
     }
 }
