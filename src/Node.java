@@ -138,6 +138,12 @@ public class Node {
         return this;
     }
 
+    private void insert (int keyId) {
+        int key = hash(keyId);
+        Node node = findSuccessor(key);
+        node.getKeys().add(key);
+    }
+
 
     /************************************************************************************************
      HELPER METHODS
@@ -208,7 +214,7 @@ public class Node {
         Node node8 = new Node(129);
         node8.join(node0);
 
-        Node node9 = new Node(255);
+        Node node9 = new Node(254);
         node9.join(node7);
 
 
@@ -222,6 +228,9 @@ public class Node {
         node7.prettyPrint();
         node8.prettyPrint();
         node9.prettyPrint();
+
+        node5.insert(255);
+        System.out.println(node0.getKeys().get(0));
     }
 
     /************************************************************************************************
