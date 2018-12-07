@@ -27,18 +27,35 @@ public class Node {
         return this.keys;
     }
 
-    private void join(Node node) {
-        if (node == null) this.initNetwork();
+    /************************************************************************************************
+     NODE JOIN METHODS - Methods involved in the addition of a new node to the network
+     ***********************************************************************************************/
+
+    /**
+     *
+     * join allows new nodes to join the network with the help of an arbitrary node already in the network
+     *
+     * @param bootstrapNode is the Bootstrapper node provided to the node that is joining. If node is null then
+     *             it is assumed that the node that is joining is the first node.
+     */
+    private void join(Node bootstrapNode) {
+        if (bootstrapNode == null) this.initNetwork();
         else {
-            this.initFingerTable(node);
+            this.initFingerTable(bootstrapNode);
             this.updateOthers();
             this.migrateKeys();
         }
     }
 
-    private void initFingerTable(Node node) {
 
-        this.put(1, node.findSuccessor(this.computeStart(1)));
+    /**
+     *
+     * @param bootstrapNode is the bootstrapper node. The node that is joining uses network state information
+     *                      provided by the bootstrapper node to populate its finger tables.
+     */
+    private void initFingerTable(Node bootstrapNode) {
+
+        this.put(1, bootstrapNode.findSuccessor(this.computeStart(1)));
 
         this.predecessor = this.getSuccessor().predecessor;
         this.getSuccessor().predecessor = this;
@@ -48,7 +65,7 @@ public class Node {
                 this.put(i, this.getFingerTable().get(i-1));
 
             else {
-                Node successor = node.findSuccessor(this.computeStart(i));
+                Node successor = bootstrapNode.findSuccessor(this.computeStart(i));
 
                 if (inClosedInterval(this.computeStart(i), this.getId(), successor.getId()))
                     this.put(i, this);
@@ -58,7 +75,11 @@ public class Node {
         }
     }
 
-    public void updateOthers() {
+
+    /**
+     * Following the node join, the node then proceeds to update other nodes in the network based on an update index
+     */
+    private void updateOthers() {
         for (int i = 1; i <= FingerTable.MAX_ENTRIES; i++) {
             int updateIndex = computeUpdateIndex(i-1);
 
@@ -71,22 +92,35 @@ public class Node {
         }
     }
 
-    private void updateFingerTable(Node node, int i) {
+
+    /**
+     *  Updates a specific entry of the finger table of this node if required,
+     *  with the node that has just joined the network
+     *
+     * @param node This is the node that has just joined the network, and needs to be added
+     *             to the finger table of this node
+     * @param entryNumber This is the entry in the finger table that needs to be updated
+     */
+    private void updateFingerTable(Node node, int entryNumber) {
         if (node.getId() == this.getId()) return;
-        if (inLeftIncludedInterval(this.getId(), node.getId(), this.getFingerTable().get(i).getId())) {
+        if (inLeftIncludedInterval(this.getId(), node.getId(), this.getFingerTable().get(entryNumber).getId())) {
 //            System.out.println("Node " + this.getId() + " is getting updated and its precedessor is " + node.getId());
-            this.getFingerTable().put(i, node);
+            this.getFingerTable().put(entryNumber, node);
             Node pred = this.predecessor;
-            pred.updateFingerTable(node, i);
+            pred.updateFingerTable(node, entryNumber);
         }
-        else if (this.computeStart(i) == node.nodeId) {
+        else if (this.computeStart(entryNumber) == node.nodeId) {
 //            System.out.println("Node " + this.getId() + " is getting updated with node " + node.getId());
-            this.getFingerTable().put(i, node);
+            this.getFingerTable().put(entryNumber, node);
             Node pred = this.predecessor;
-            pred.updateFingerTable(node, i);
+            pred.updateFingerTable(node, entryNumber);
         }
     }
 
+
+    /**
+     * Initializes the network when the first node joins
+     */
     private void initNetwork() {
         for (int i = 1; i <= FingerTable.MAX_ENTRIES; i++) {
             this.getFingerTable().put(i, this);
@@ -99,10 +133,21 @@ public class Node {
      BASIC FOUNDATIONAL METHODS
      ***********************************************************************************************/
 
+    /**
+     * This function returns the node that is the successor of the specified ID
+     *
+     * @param id is the id of the Node or the key
+     * @return Successor of the id
+     */
     private Node findSuccessor(int id) {
         return this.findPredecessor(id).getSuccessor();
     }
 
+    /**
+     * This function returns the node that precedes the specified ID on the chord ring
+     * @param id
+     * @return Predecessor of the id
+     */
     private Node findPredecessor(int id) {
 
         Node predecessor = this;
@@ -115,6 +160,11 @@ public class Node {
         return predecessor;
     }
 
+    /**
+     * This functions looks in this node's finger table to find the node that is closest to the id
+     * @param id
+     * @return Node closest to the specified id
+     */
     private Node findClosestPrecedingFinger(int id) {
 
         for (int i = FingerTable.MAX_ENTRIES; i >= 1 ; i--) {
@@ -178,7 +228,6 @@ public class Node {
         return removedKeys;
     }
 
-
     /************************************************************************************************
      HELPER METHODS
      ***********************************************************************************************/
@@ -221,7 +270,7 @@ public class Node {
         Node node0 = new Node(255);
         node0.join(null);
 
-//        node0.insert(0);
+        node0.insert(0);
 
         Node node1 = new Node(2);
         node1.join(node0);
@@ -238,6 +287,8 @@ public class Node {
         Node node5 = new Node(32);
         node5.join(node4);
 
+        node5.insert(255);
+
         Node node6 = new Node(67);
         node6.join(node5);
 
@@ -249,8 +300,6 @@ public class Node {
 
         Node node9 = new Node(254);
         node9.join(node7);
-
-        node9.insert(0);
 
         Node node10 = new Node(0);
         node10.join(node9);
@@ -266,8 +315,6 @@ public class Node {
         node8.prettyPrint();
         node9.prettyPrint();
         node10.prettyPrint();
-
-        node5.insert(255);
 
         System.out.println(node0.getKeys().get(0));
         System.out.println(node10.getKeys().get(0));
