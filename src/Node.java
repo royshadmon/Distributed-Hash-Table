@@ -402,7 +402,7 @@ public class Node {
         for (int i = 0; i < totalNodes; i++) {
             int index = (int) (Math.random()*(255-i));
             int num = NodeList.get(index);
-
+            System.out.println("Adding Node " + num);
             nodes.add(new Node(num));
             NodeList.remove(index);
         }
@@ -466,6 +466,7 @@ public class Node {
         Node node10 = nodes.get(10);
         node10.join(node7);
 
+        System.out.println("------------Printing final node tables after inserting all nodes-----------");
         node0.prettyPrint();
         node1.prettyPrint();
         node2.prettyPrint();
