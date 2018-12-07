@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class Node {
@@ -48,6 +49,7 @@ public class Node {
             this.prettyPrint();
         }
     }
+
 
 
     /**
@@ -141,6 +143,49 @@ public class Node {
         // 2. Update other tables to remove references to this node
         // 3. Reset the predecessor field of this node's successor to this node's predecessor
 
+        if ( this.getSuccessor().equals(this)) {
+            System.out.println("No nodes left in the network!");
+            return;
+        }
+
+        this.getSuccessor().getKeys().addAll(this.getKeys());
+
+        List<Node> activeNodes = this.getActiveNodes();
+        activeNodes.remove(this);
+
+        for (Node node : activeNodes) {
+            for (int i = 1; i <= FingerTable.MAX_ENTRIES; i++) {
+                Node succ = this.findSuccessor(node.computeStart(i));
+                if (succ.getId() == this.getId()) {
+                    succ = this.getSuccessor();
+                }
+                node.put(i, succ);
+            }
+        }
+        this.getSuccessor().predecessor = this.predecessor;
+        this.table = new FingerTable(this.getId());
+
+    }
+
+    private List<Node> getActiveNodes(){
+        List<Node> list = new ArrayList<>();
+
+        Node temp = this;
+        while (temp.getSuccessor() != this) {
+            list.add(temp);
+            temp = temp.getSuccessor();
+        }
+        list.add(temp);
+
+        list.sort(new NodeComparator());
+
+        return list;
+    }
+
+    class NodeComparator implements Comparator<Node> {
+        public int compare(Node a, Node b) {
+            return a.getId() - b.getId();
+        }
     }
 
     /************************************************************************************************
@@ -380,6 +425,11 @@ public class Node {
         Node node10 = new Node(0);
         node10.join(node9);
 
+        node9.leave();
+        node0.leave();
+        node3.leave();
+        node6.leave();
+
         node0.prettyPrint();
         node1.prettyPrint();
         node2.prettyPrint();
@@ -392,16 +442,18 @@ public class Node {
         node9.prettyPrint();
         node10.prettyPrint();
 
-        System.out.println(node0.getKeys().get(0)==255);
-        System.out.println(node10.getKeys().get(0)==0);
 
-        System.out.println(node1.getKeys().get(0)==2);
-        System.out.println(node2.getKeys().get(0)==4);
-        System.out.println(node3.getKeys().get(0)==8);
 
-        System.out.println(node4.getKeys().size());
-
-        System.out.println(node5.getKeys().get(0)==17);
+//        System.out.println(node0.getKeys().get(0)==255);
+//        System.out.println(node10.getKeys().get(0)==0);
+//
+//        System.out.println(node1.getKeys().get(0)==2);
+//        System.out.println(node2.getKeys().get(0)==4);
+//        System.out.println(node3.getKeys().get(0)==8);
+//
+//        System.out.println(node4.getKeys().size());
+//
+//        System.out.println(node5.getKeys().get(0)==17);
 
     }
 
