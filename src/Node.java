@@ -24,12 +24,12 @@ public class Node {
 
 
     /************************************************************************************************
-     NODE JOIN METHODS - Methods involved in the addition of a new node to the network
-     ***********************************************************************************************/
+     NODE JOIN METHODS - Methods involved in the addition of a new node to the network.
+     ************************************************************************************************
 
-    /**
+    /*
      *
-     * Join allows new nodes to join the network with the help of an arbitrary node already in the network
+     * Join allows new nodes to join the network with the help of an arbitrary node already in the network.
      *
      * @param helper is the Bootstrapper node provided to the node that is joining. If node is null then
      *             it is assumed that the node that is joining is the first node.
@@ -44,11 +44,14 @@ public class Node {
             this.initFingerTable(helper);
             this.updateOthers();
             this.migrateKeys();
+
+            this.prettyPrint();
         }
     }
 
 
     /**
+     * Initializes the finger table of the joining node.
      *
      * @param helper is the bootstrapper node. The node that is joining uses network state information
      *                      provided by the bootstrapper node to populate its finger tables.
@@ -77,7 +80,7 @@ public class Node {
 
 
     /**
-     * Following the node join, the node then proceeds to update other nodes in the network based on an update index
+     * Following the node join, the node then proceeds to update other nodes in the network based on an update index.
      */
     private void updateOthers() {
         for (int i = 1; i <= FingerTable.MAX_ENTRIES; i++) {
@@ -95,11 +98,11 @@ public class Node {
 
     /**
      *  Updates a specific entry of the finger table of this node if required,
-     *  with the node that has just joined the network
+     *  with the node that has just joined the network.
      *
      * @param node This is the node that has just joined the network, and needs to be added
-     *             to the finger table of this node
-     * @param entryNumber This is the entry in the finger table that needs to be updated
+     *             to the finger table of this node.
+     * @param entryNumber This is the entry in the finger table that needs to be updated.
      */
     private void updateFingerTable(Node node, int entryNumber) {
         if (node.getId() == this.getId()) return;
@@ -142,15 +145,14 @@ public class Node {
 
     /************************************************************************************************
      KEY METHODS - Methods used for the addition and removal of keys in the network
-     ***********************************************************************************************/
-
+     ************************************************************************************************
 
     /**
-     * If the key exists, returns the node containing the key. Else returns null
+     * If the key exists, returns the node containing the key. Else returns null.
      *
      * @param keyId
      * @return Node or null
-     * @throws IndexOutOfBoundsException Keys must be between 0 and 256
+     * @throws IndexOutOfBoundsException Keys must be between 0 and 255.
      */
     public Node find(int keyId) {
         if (!inLeftIncludedInterval(0, keyId, FingerTable.MAX_NODES))
@@ -165,10 +167,10 @@ public class Node {
 
 
     /**
-     * Inserts the key at the Successor of the keyId
+     * Inserts the key at the Successor of the keyId.
      *
      * @param keyId
-     * @throws IndexOutOfBoundsException Keys must be between 0 and 256
+     * @throws IndexOutOfBoundsException Keys must be between 0 and 255.
      */
     public void insert(int keyId) {
         if (!inLeftIncludedInterval(0, keyId, FingerTable.MAX_NODES))
@@ -181,10 +183,10 @@ public class Node {
 
 
     /**
-     * If present, removes the key from the correct node
+     * If present, removes the key from the correct node.
      *
      * @param keyId
-     * @throws IndexOutOfBoundsException Keys must be between 0 and 256
+     * @throws IndexOutOfBoundsException Keys must be between 0 and 255.
      */
     public void remove(int keyId) {
         if (!inLeftIncludedInterval(0, keyId, FingerTable.MAX_NODES))
@@ -199,7 +201,7 @@ public class Node {
 
 
     /**
-     * This function is called when a new node joins, and transfers keys to the node (this node) joining the network
+     * This function is called when a new node joins, and transfers keys to the node (this node) joining the network.
      *
      */
     private void migrateKeys() {
@@ -221,10 +223,10 @@ public class Node {
 
 
     /**
-     *  Removes keys that no longer belond to this node
+     *  Removes keys that no longer belong to this node.
      *
      * @param id
-     * @return keys that have been removed from this node
+     * @return keys that have been removed from this node.
      */
     private List<Integer> updateKeys(int id) {
         List<Integer> removedKeys = new ArrayList<>();
@@ -249,22 +251,22 @@ public class Node {
 
 
     /************************************************************************************************
-     BASIC FOUNDATIONAL METHODS - Helper methods to find the successor and predecessor of an id
-     ***********************************************************************************************/
+     BASIC FOUNDATIONAL METHODS - Helper methods to find the successor and predecessor of an id.
+     ************************************************************************************************
 
     /**
      * This function returns the node that is the successor of the specified ID
      *
      * @param id is the id of the Node or the key
-     * @return Successor of the id
+     * @return Node that is the Successor of the id
      */
     private Node findSuccessor(int id) { return this.findPredecessor(id).getSuccessor(); }
 
 
     /**
-     * This function returns the node that precedes the specified ID on the chord ring
+     * This function returns the node that precedes the specified ID on the chord ring.
      * @param id
-     * @return Predecessor of the id
+     * @return Node that is the Predecessor of the id.
      */
     private Node findPredecessor(int id) {
         Node predecessor = this;
@@ -277,9 +279,9 @@ public class Node {
 
 
     /**
-     * This functions looks in this node's finger table to find the node that is closest to the id
+     * This functions looks in this node's finger table to find the node that is closest to the id.
      * @param id
-     * @return Node closest to the specified id
+     * @return Node in the finger table that is closest to the specified id.
      */
     private Node findClosestPrecedingFinger(int id) {
         for (int i = FingerTable.MAX_ENTRIES; i >= 1 ; i--)
@@ -291,10 +293,10 @@ public class Node {
 
     /************************************************************************************************
      HELPER METHODS
-     **********************************************************************************************/
+     ************************************************************************************************
 
     /**
-     * Returns first entry of the finger table
+     * Returns first entry of the finger table.
      */
     private Node getSuccessor() { return this.get(1); }
 
@@ -309,7 +311,7 @@ public class Node {
 
 
     /**
-     * Computes: id - 2^(i-1)
+     * Computes: id - 2^(i)
      *
      * @param index
      * @return
@@ -331,13 +333,20 @@ public class Node {
 
     /************************************************************************************************
      MAIN METHOD
-     **********************************************************************************************/
+     ************************************************************************************************/
 
     public static void main(String[] args) {
         Node node0 = new Node(255);
         node0.join(null);
 
         node0.insert(0);
+        node0.insert(2);
+        node0.insert(4);
+        node0.insert(8);
+        node0.insert(9);
+        node0.insert(16);
+        node0.insert(14);
+        node0.insert(17);
 
         Node node1 = new Node(2);
         node1.join(node0);
@@ -383,25 +392,26 @@ public class Node {
         node9.prettyPrint();
         node10.prettyPrint();
 
-        System.out.println(node0.getKeys().get(0));
-        System.out.println(node10.getKeys().get(0));
-        System.out.println(node0.find(0) != null);
+        System.out.println(node0.getKeys().get(0)==255);
+        System.out.println(node10.getKeys().get(0)==0);
 
-        node10.remove(0);
-        node10.remove(255);
+        System.out.println(node1.getKeys().get(0)==2);
+        System.out.println(node2.getKeys().get(0)==4);
+        System.out.println(node3.getKeys().get(0)==8);
 
-        System.out.println(node10.getKeys().size());
-        System.out.println(node0.getKeys().size());
-        System.out.println(node0.find(0) == null);
+        System.out.println(node4.getKeys().size());
+
+        System.out.println(node5.getKeys().get(0)==17);
+
     }
 
 
     /************************************************************************************************
      PRIVATE STATIC HELPER FUNCTIONS
-     **********************************************************************************************/
+     ************************************************************************************************
 
     /**
-     * Emulates C++ Unsigned 8 bit Integer
+     * Emulates C++ Unsigned 8 bit Integer.
      * @param number
      * @return
      */
