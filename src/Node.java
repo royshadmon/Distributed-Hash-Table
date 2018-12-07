@@ -163,7 +163,7 @@ public class Node {
              it should be removed from this node's keyset */
             int key = this.getKeys().get(i);
 
-            if (key <= id && key !=this.getId()) {
+            if (inRightIncludedInterval(this.getId(), key, id)) {
                 System.out.println("Updating keys of Node " + this.getId());
                 System.out.println();
                 System.out.println("Removing key with id: " + key);
@@ -172,6 +172,7 @@ public class Node {
                 this.getKeys().remove(i);
                 i--;
             }
+
         }
 
         return removedKeys;
@@ -220,7 +221,7 @@ public class Node {
         Node node0 = new Node(255);
         node0.join(null);
 
-        node0.insert(0);
+//        node0.insert(0);
 
         Node node1 = new Node(2);
         node1.join(node0);
@@ -249,6 +250,11 @@ public class Node {
         Node node9 = new Node(254);
         node9.join(node7);
 
+        node9.insert(0);
+
+        Node node10 = new Node(0);
+        node10.join(node9);
+
         node0.prettyPrint();
         node1.prettyPrint();
         node2.prettyPrint();
@@ -259,11 +265,12 @@ public class Node {
         node7.prettyPrint();
         node8.prettyPrint();
         node9.prettyPrint();
+        node10.prettyPrint();
 
         node5.insert(255);
 
         System.out.println(node0.getKeys().get(0));
-        System.out.println(node1.getKeys().get(0));
+        System.out.println(node10.getKeys().get(0));
     }
 
     /************************************************************************************************
