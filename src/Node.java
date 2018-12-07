@@ -1,3 +1,4 @@
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -381,49 +382,104 @@ public class Node {
      ************************************************************************************************/
 
     public static void main(String[] args) {
-        Node node0 = new Node(255);
+
+        // Make 2 lists of numbers from 0 to 255
+
+        List <Integer> NodeList = new ArrayList<>();
+        List <Integer> KeyList = new ArrayList<>();
+
+        for (int i = 0; i < FingerTable.MAX_NODES; i++) {
+            NodeList.add(i);
+            KeyList.add(i);
+        }
+
+        int totalNodes = 11;
+        int totalKeys = 13;
+
+        List<Node> nodes = new ArrayList<>();
+        List<Integer> keys = new ArrayList<>();
+
+        for (int i = 0; i < totalNodes; i++) {
+            int index = (int) (Math.random()*(255-i));
+            int num = NodeList.get(index);
+
+            nodes.add(new Node(num));
+            NodeList.remove(index);
+        }
+
+        for (int i = 0; i < totalKeys; i++) {
+            int index = (int) (Math.random() * (255-i));
+            int num = KeyList.get(index);
+
+            keys.add(num);
+            KeyList.remove(index);
+        }
+
+        Node node0 = nodes.get(0);
         node0.join(null);
 
-        node0.insert(0);
-        node0.insert(2);
-        node0.insert(4);
-        node0.insert(8);
-        node0.insert(9);
-        node0.insert(16);
-        node0.insert(14);
-        node0.insert(17);
-
-        Node node1 = new Node(2);
+        Node node1= nodes.get(1);
         node1.join(node0);
 
-        Node node2 = new Node(4);
-        node2.join(node1);
+        node0.insert(keys.get(0));
+        node1.insert(keys.get(1));
 
-        Node node3 = new Node(8);
+
+        Node node2 = nodes.get(2);
+        node2.join(node0);
+
+        Node node3 = nodes.get(3);
         node3.join(node2);
 
-        Node node4 = new Node(16);
-        node4.join(node3);
+        Node node4 = nodes.get(4);
+        node4.join(node1);
 
-        Node node5 = new Node(32);
-        node5.join(node4);
+        node3.insert(keys.get(2));
+        node0.insert(keys.get(3));
 
-        node5.insert(255);
+        Node node5 = nodes.get(5);
+        node5.join(node2);
 
-        Node node6 = new Node(67);
+        node4.insert(keys.get(4));
+        node3.insert(keys.get(5));
+        node0.insert(keys.get(6));
+        node0.insert(keys.get(7));
+        node1.insert(keys.get(8));
+        node2.insert(keys.get(9));
+
+        Node node6 = nodes.get(6);
         node6.join(node5);
 
-        Node node7 = new Node(128);
-        node7.join(node6);
+        Node node7 = nodes.get(7);
+        node7.join(node4);
 
-        Node node8 = new Node(129);
-        node8.join(node0);
+        Node node8 = nodes.get(8);
+        node8.join(node7);
 
-        Node node9 = new Node(254);
-        node9.join(node7);
+        node8.insert(keys.get(10));
+        node4.insert(keys.get(11));
+        node6.insert(keys.get(12));
 
-        Node node10 = new Node(0);
-        node10.join(node9);
+        Node node9 = nodes.get(9);
+        node9.join(node0);
+
+        Node node10 = nodes.get(10);
+        node10.join(node7);
+
+        node0.prettyPrint();
+        node1.prettyPrint();
+        node2.prettyPrint();
+        node3.prettyPrint();
+        node4.prettyPrint();
+        node5.prettyPrint();
+        node6.prettyPrint();
+        node7.prettyPrint();
+        node8.prettyPrint();
+        node9.prettyPrint();
+        node10.prettyPrint();
+
+
+        System.out.println("------------Nodes leave now, then reprint---------------");
 
         node9.leave();
         node0.leave();
