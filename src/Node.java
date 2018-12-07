@@ -9,6 +9,9 @@ public class Node {
     private List<Integer> keys;
 
     Node (int nodeId) {
+        if (!inLeftIncludedInterval(0, nodeId, FingerTable.MAX_NODES))
+            throw new IndexOutOfBoundsException("Invalid Key Id");
+
         this.nodeId = hash(nodeId);
         this.table = new FingerTable(nodeId);
         this.keys = new ArrayList<>();
@@ -16,8 +19,6 @@ public class Node {
     }
 
     public int getId() { return this.nodeId; }
-
-    public FingerTable getFingerTable() { return this.table; }
 
     public List<Integer> getKeys() { return this.keys; }
 
@@ -28,14 +29,18 @@ public class Node {
 
     /**
      *
-     * join allows new nodes to join the network with the help of an arbitrary node already in the network
+     * Join allows new nodes to join the network with the help of an arbitrary node already in the network
      *
      * @param helper is the Bootstrapper node provided to the node that is joining. If node is null then
      *             it is assumed that the node that is joining is the first node.
+     *
+     * @throws RuntimeException Cannot join from the same node.
      */
     public void join(Node helper) {
         if (helper == null) this.initNetwork();
         else {
+            if (helper.equals(this)) throw new RuntimeException("Cannot join using same node");
+
             this.initFingerTable(helper);
             this.updateOthers();
             this.migrateKeys();
@@ -139,12 +144,36 @@ public class Node {
      KEY METHODS - Methods used for the addition and removal of keys in the network
      ***********************************************************************************************/
 
+
+    /**
+     * If the key exists, returns the node containing the key. Else returns null
+     *
+     * @param keyId
+     * @return Node or null
+     * @throws IndexOutOfBoundsException Keys must be between 0 and 256
+     */
+    public Node find(int keyId) {
+        if (!inLeftIncludedInterval(0, keyId, FingerTable.MAX_NODES))
+            throw new IndexOutOfBoundsException("Invalid Key Id");
+
+        int key = hash(keyId);
+        Node node = this.findSuccessor(key);
+
+        if (node.getKeys().indexOf(key) != -1) return node;
+        else return null;
+    }
+
+
     /**
      * Inserts the key at the Successor of the keyId
      *
      * @param keyId
+     * @throws IndexOutOfBoundsException Keys must be between 0 and 256
      */
     public void insert(int keyId) {
+        if (!inLeftIncludedInterval(0, keyId, FingerTable.MAX_NODES))
+            throw new IndexOutOfBoundsException("Invalid Key Id");
+
         int key = hash(keyId);
         Node node = this.findSuccessor(key);
         node.getKeys().add(key);
@@ -155,8 +184,12 @@ public class Node {
      * If present, removes the key from the correct node
      *
      * @param keyId
+     * @throws IndexOutOfBoundsException Keys must be between 0 and 256
      */
     public void remove(int keyId) {
+        if (!inLeftIncludedInterval(0, keyId, FingerTable.MAX_NODES))
+            throw new IndexOutOfBoundsException("Invalid Key Id");
+
         int key = hash(keyId);
         Node node = this.findSuccessor(key);
 
@@ -185,6 +218,7 @@ public class Node {
             System.out.println();
         }
     }
+
 
     /**
      *  Removes keys that no longer belond to this node
@@ -224,9 +258,7 @@ public class Node {
      * @param id is the id of the Node or the key
      * @return Successor of the id
      */
-    private Node findSuccessor(int id) {
-        return this.findPredecessor(id).getSuccessor();
-    }
+    private Node findSuccessor(int id) { return this.findPredecessor(id).getSuccessor(); }
 
 
     /**
@@ -235,14 +267,11 @@ public class Node {
      * @return Predecessor of the id
      */
     private Node findPredecessor(int id) {
-
         Node predecessor = this;
 
-        while (!inRightIncludedInterval(predecessor.getId(), id, predecessor.getSuccessor().getId())) {
-            Node temp = predecessor.findClosestPrecedingFinger(id);
+        while (!inRightIncludedInterval(predecessor.getId(), id, predecessor.getSuccessor().getId()))
+            predecessor = predecessor.findClosestPrecedingFinger(id);
 
-            predecessor = temp;
-        }
         return predecessor;
     }
 
@@ -253,14 +282,8 @@ public class Node {
      * @return Node closest to the specified id
      */
     private Node findClosestPrecedingFinger(int id) {
-
-        for (int i = FingerTable.MAX_ENTRIES; i >= 1 ; i--) {
-            Node node = this.getFingerTable().get(i);
-
-            if (inOpenInterval(this.getId(), node.getId(), id)) {
-                return node;
-            }
-        }
+        for (int i = FingerTable.MAX_ENTRIES; i >= 1 ; i--)
+            if (inOpenInterval(this.getId(), this.get(i).getId(), id)) return this.get(i);
 
         return this;
     }
@@ -270,10 +293,11 @@ public class Node {
      HELPER METHODS
      **********************************************************************************************/
 
+    /**
+     * Returns first entry of the finger table
+     */
+    private Node getSuccessor() { return this.get(1); }
 
-    private Node getSuccessor() {
-        return this.getFingerTable().get(1);
-    }
 
     /**
      * Computes: id + 2^(i-1)
@@ -281,9 +305,8 @@ public class Node {
      * @param entryNumber
      * @return
      */
-    private int computeStart(int entryNumber) {
-        return FingerTable.computeStart(this.getId(), entryNumber);
-    }
+    private int computeStart(int entryNumber) { return FingerTable.computeStart(this.getId(), entryNumber); }
+
 
     /**
      * Computes: id - 2^(i-1)
@@ -301,9 +324,9 @@ public class Node {
 
     public String toString() { return "" + this.getId(); }
 
-    private void put(int entryNumber, Node node) { this.getFingerTable().put(entryNumber, node); }
+    private void put(int entryNumber, Node node) { this.table.put(entryNumber, node); }
 
-    private Node get(int entryNumber) { return this.getFingerTable().get(entryNumber); }
+    private Node get(int entryNumber) { return this.table.get(entryNumber); }
 
 
     /************************************************************************************************
@@ -362,12 +385,14 @@ public class Node {
 
         System.out.println(node0.getKeys().get(0));
         System.out.println(node10.getKeys().get(0));
+        System.out.println(node0.find(0) != null);
 
         node10.remove(0);
         node10.remove(255);
 
         System.out.println(node10.getKeys().size());
         System.out.println(node0.getKeys().size());
+        System.out.println(node0.find(0) == null);
     }
 
 
