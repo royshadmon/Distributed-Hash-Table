@@ -5,7 +5,7 @@ class FingerTable {
 
     static final int MAX_ENTRIES = 8;
 
-    static final int MOD = (int) (Math.pow(2, MAX_ENTRIES));
+    static final int MAX_NODES = (int) (Math.pow(2, MAX_ENTRIES));
     private LinkedHashMap<Integer, Node> fingerTable = new LinkedHashMap<>();
 
     FingerTable(Integer hostNodeId) {
@@ -43,14 +43,14 @@ class FingerTable {
 
     private Integer computeStart(Integer entryNumber) {
         int index = this.hostNodeId + (int) ((Math.pow(2, entryNumber - 1)));
-        index = index % MOD;
+        index = index % MAX_NODES;
         return index;
 
     }
 
     static Integer computeStart(int hostNodeId, int entryNumber) {
         int index = hostNodeId + (int) ((Math.pow(2, entryNumber - 1)));
-        index = index % MOD;
+        index = index % MAX_NODES;
         return index;
     }
 
