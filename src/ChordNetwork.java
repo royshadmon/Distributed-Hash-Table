@@ -38,6 +38,12 @@ public class ChordNetwork {
         node5.join(node2);
 
         node4.insert(keys.get(4), resource);
+
+        System.out.println("Finding keys");
+        System.out.println(node0.find(0));
+        System.out.println("End Finding Keys\n");
+
+
         node3.insert(keys.get(5), resource);
         node0.insert(keys.get(6), resource);
         node0.insert(keys.get(7), resource);
@@ -75,6 +81,12 @@ public class ChordNetwork {
         node8.prettyPrint();
         node9.prettyPrint();
         node10.prettyPrint();
+
+        System.out.println("Finding keys");
+        System.out.println(node5.find(64));
+        System.out.println(node2.find(232));
+        System.out.println("End Finding Keys\n");
+
 
         System.out.println("\n------------Nodes leave now, then reprint---------------");
 
