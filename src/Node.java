@@ -133,11 +133,14 @@ public class Node {
 
     /************************************************************************************************
      NODE LEAVE - Methods used exclusively for the node leave operation
-     ***********************************************************************************************/
+     ************************************************************************************************
 
+    /**
+     *
+     */
     public void leave() {
 
-        if ( this.getSuccessor().equals(this)) {
+        if (this.getSuccessor().equals(this)) {
             System.out.println("No nodes left in the network!");
             return;
         }
@@ -156,11 +159,16 @@ public class Node {
                 node.put(i, succ);
             }
         }
+
         this.getSuccessor().predecessor = this.predecessor;
         this.table = new FingerTable(this.getId());
         this.keys = new ArrayList<>();
     }
 
+    /**
+     *
+     * @return
+     */
     private List<Node> getActiveNodes(){
         List<Node> list = new ArrayList<>();
 
@@ -176,6 +184,10 @@ public class Node {
         return list;
     }
 
+
+    /**
+     *  Helper Class to allow for Node sorting if required. Used only in getActiveNodes
+     */
     class NodeComparator implements Comparator<Node> {
         public int compare(Node a, Node b) {
             return a.getId() - b.getId();
@@ -236,6 +248,7 @@ public class Node {
 
         int index = node.getKeys().indexOf(key);
         if (index != -1) node.getKeys().remove(index);
+        else System.out.println("Key with id "+ keyId +" not found");
     }
 
 
@@ -363,13 +376,9 @@ public class Node {
 
     public void prettyPrint() {
         this.table.prettyPrint();
-
-        // print keys
-        if (this.getKeys().size() > 0) {
-            System.out.println("Node " + this + "'s keys are: ");
-            this.getKeys().forEach((key) -> System.out.print(key + ", "));
-            System.out.println("\n-------------------------");
-        }
+        if (this.getKeys().size() > 0)
+            System.out.println("Node " + this + "'s keys are: " + this.getKeys());
+        System.out.println("\n___________________________________");
     }
 
     public String toString() { return "" + this.getId(); }

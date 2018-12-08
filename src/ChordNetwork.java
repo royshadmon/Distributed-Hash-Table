@@ -76,7 +76,7 @@ public class ChordNetwork {
         node10.prettyPrint();
 
 
-        System.out.println("------------Nodes leave now, then reprint---------------");
+        System.out.println("\n------------Nodes leave now, then reprint---------------");
 
         node9.leave();
         node0.leave();
@@ -94,9 +94,6 @@ public class ChordNetwork {
         node8.prettyPrint();
         node9.prettyPrint();
         node10.prettyPrint();
-
-        ChordTester.generateRandomNodeList(totalNodes);
-        ChordTester.generateRandomKeyList(totalKeys);
 
     }
 
