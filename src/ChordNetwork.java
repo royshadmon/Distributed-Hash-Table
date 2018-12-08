@@ -1,3 +1,5 @@
+import org.omg.PortableInterceptor.INACTIVE;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -8,6 +10,7 @@ public class ChordNetwork {
 
         int totalNodes = 11;
         int totalKeys = 13;
+        String resource = "192.168.0.0";
 
         List<Node> nodes = ChordTester.generateRandomNodeList(totalNodes);
         List<Integer> keys = ChordTester.generateRandomKeyList(totalKeys);
@@ -18,8 +21,8 @@ public class ChordNetwork {
         Node node1 = nodes.get(1);
         node1.join(node0);
 
-        node0.insert(keys.get(0));
-        node1.insert(keys.get(1));
+        node0.insert(keys.get(0), resource);
+        node1.insert(keys.get(1), resource);
 
         Node node2 = nodes.get(2);
         node2.join(node0);
@@ -30,18 +33,18 @@ public class ChordNetwork {
         Node node4 = nodes.get(4);
         node4.join(node1);
 
-        node3.insert(keys.get(2));
-        node0.insert(keys.get(3));
+        node3.insert(keys.get(2), resource);
+        node0.insert(keys.get(3), resource);
 
         Node node5 = nodes.get(5);
         node5.join(node2);
 
-        node4.insert(keys.get(4));
-        node3.insert(keys.get(5));
-        node0.insert(keys.get(6));
-        node0.insert(keys.get(7));
-        node1.insert(keys.get(8));
-        node2.insert(keys.get(9));
+        node4.insert(keys.get(4), resource);
+        node3.insert(keys.get(5), resource);
+        node0.insert(keys.get(6), resource);
+        node0.insert(keys.get(7), resource);
+        node1.insert(keys.get(8), resource);
+        node2.insert(keys.get(9), resource);
 
         Node node6 = nodes.get(6);
         node6.join(node5);
@@ -52,9 +55,9 @@ public class ChordNetwork {
         Node node8 = nodes.get(8);
         node8.join(node7);
 
-        node8.insert(keys.get(10));
-        node4.insert(keys.get(11));
-        node6.insert(keys.get(12));
+        node8.insert(keys.get(10), resource);
+        node4.insert(keys.get(11), resource);
+        node6.insert(keys.get(12), resource);
 
         Node node9 = nodes.get(9);
         node9.join(node0);
@@ -74,7 +77,6 @@ public class ChordNetwork {
         node8.prettyPrint();
         node9.prettyPrint();
         node10.prettyPrint();
-
 
         System.out.println("\n------------Nodes leave now, then reprint---------------");
 
@@ -102,10 +104,16 @@ public class ChordNetwork {
         private static Random generator = new Random(0);
 
         private static List<Node> generateRandomNodeList(int numberOfNodes) {
+            List<Integer> ids = generateListOfIds();
+
             List<Node> nodeList = new ArrayList<>();
 
             for (int i = 0; i < numberOfNodes; i++) {
-                int nodeId = generator.nextInt(FingerTable.MAX_NODES);
+                int randomIndex = generator.nextInt(FingerTable.MAX_NODES - i);
+
+                int nodeId = ids.get(randomIndex);
+                ids.remove(randomIndex);
+
                 nodeList.add(new Node(nodeId));
             }
 
@@ -114,14 +122,25 @@ public class ChordNetwork {
         }
 
         private static List<Integer> generateRandomKeyList(int numberOfKeys) {
+            List<Integer> ids = generateListOfIds();
             List<Integer> keyList = new ArrayList<>();
 
             for (int i = 0; i < numberOfKeys; i++) {
-                int keyId = generator.nextInt(FingerTable.MAX_NODES);
+                int randomIndex = generator.nextInt(FingerTable.MAX_NODES - i);
+                int keyId = ids.get(randomIndex);
                 keyList.add(keyId);
             }
             System.out.println("Keys that have been generated: " + keyList);
             return keyList;
+        }
+
+        private static List<Integer> generateListOfIds() {
+            List<Integer> idList = new ArrayList<>();
+            for (int i = 0; i < FingerTable.MAX_NODES; i++) {
+                idList.add(i);
+            }
+
+            return idList;
         }
 
     }
