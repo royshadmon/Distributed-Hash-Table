@@ -1,51 +1,25 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class ChordNetwork {
 
     public static void main(String[] args) {
 
-        // Make 2 lists of numbers from 0 to 255
-
-        List<Integer> NodeList = new ArrayList<>();
-        List <Integer> KeyList = new ArrayList<>();
-
-        for (int i = 0; i < FingerTable.MAX_NODES; i++) {
-            NodeList.add(i);
-            KeyList.add(i);
-        }
-
         int totalNodes = 11;
         int totalKeys = 13;
 
-        List<Node> nodes = new ArrayList<>();
-        List<Integer> keys = new ArrayList<>();
-
-        for (int i = 0; i < totalNodes; i++) {
-            int index = (int) (Math.random()*(255-i));
-            int num = NodeList.get(index);
-            System.out.println("Adding Node " + num);
-            nodes.add(new Node(num));
-            NodeList.remove(index);
-        }
-
-        for (int i = 0; i < totalKeys; i++) {
-            int index = (int) (Math.random() * (255-i));
-            int num = KeyList.get(index);
-
-            keys.add(num);
-            KeyList.remove(index);
-        }
+        List<Node> nodes = ChordTester.generateRandomNodeList(totalNodes);
+        List<Integer> keys = ChordTester.generateRandomKeyList(totalKeys);
 
         Node node0 = nodes.get(0);
         node0.join(null);
 
-        Node node1= nodes.get(1);
+        Node node1 = nodes.get(1);
         node1.join(node0);
 
         node0.insert(keys.get(0));
         node1.insert(keys.get(1));
-
 
         Node node2 = nodes.get(2);
         node2.join(node0);
@@ -121,18 +95,38 @@ public class ChordNetwork {
         node9.prettyPrint();
         node10.prettyPrint();
 
-
-
-//        System.out.println(node0.getKeys().get(0)==255);
-//        System.out.println(node10.getKeys().get(0)==0);
-//
-//        System.out.println(node1.getKeys().get(0)==2);
-//        System.out.println(node2.getKeys().get(0)==4);
-//        System.out.println(node3.getKeys().get(0)==8);
-//
-//        System.out.println(node4.getKeys().size());
-//
-//        System.out.println(node5.getKeys().get(0)==17);
+        ChordTester.generateRandomNodeList(totalNodes);
+        ChordTester.generateRandomKeyList(totalKeys);
 
     }
+
+    private static class ChordTester {
+
+        private static Random generator = new Random(0);
+
+        private static List<Node> generateRandomNodeList(int numberOfNodes) {
+            List<Node> nodeList = new ArrayList<>();
+
+            for (int i = 0; i < numberOfNodes; i++) {
+                int nodeId = generator.nextInt(FingerTable.MAX_NODES);
+                nodeList.add(new Node(nodeId));
+            }
+
+            System.out.println("Nodes that have been generated: " + nodeList);
+            return nodeList;
+        }
+
+        private static List<Integer> generateRandomKeyList(int numberOfKeys) {
+            List<Integer> keyList = new ArrayList<>();
+
+            for (int i = 0; i < numberOfKeys; i++) {
+                int keyId = generator.nextInt(FingerTable.MAX_NODES);
+                keyList.add(keyId);
+            }
+            System.out.println("Keys that have been generated: " + keyList);
+            return keyList;
+        }
+
+    }
+
 }

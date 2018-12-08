@@ -31,14 +31,16 @@ class FingerTable {
     }
 
     public void prettyPrint() {
-        System.out.println("----------------------");
-        System.out.println("Finger Table - Node " + this.hostNodeId);
-        System.out.println("----------------------");
-        this.fingerTable.forEach((key, value) -> {
-            System.out.print(" Start: " + key);
-            System.out.println("      Id: " + value.getId());
-        });
-        System.out.println("----------------------");
+        if (this.fingerTable.size() > 0) {
+            System.out.println("-------------------------");
+            System.out.println("Finger Table - Node " + this.hostNodeId);
+            System.out.println("-------------------------");
+            this.fingerTable.forEach((key, value) -> {
+                System.out.print(" Start: " + key);
+                System.out.println("      Id: " + value.getId());
+            });
+            System.out.println("-------------------------");
+        }
     }
 
     private Integer computeStart(Integer entryNumber) {
