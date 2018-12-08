@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 
 public class Node {
 
@@ -9,7 +9,9 @@ public class Node {
     private Node predecessor;
     private FingerTable table;
 //    private List<Integer> keys;
-    private List<Entry<Integer, String>> entries;
+    private List<ChordEntry<Integer, String>> entries;
+
+    private static boolean lookupPrint = false;
 
     Node (int nodeId) {
         if (!inLeftIncludedInterval(0, nodeId, FingerTable.MAX_NODES))
@@ -24,7 +26,7 @@ public class Node {
 
     public int getId() { return this.nodeId; }
 
-//    public List<Integer> getKeys() { return this.keys; }
+//    public List<Integer> getEntries() { return this.entries; }
 
     /************************************************************************************************
      NODE JOIN METHODS - Methods involved in the addition of a new node to the network.
@@ -226,7 +228,7 @@ public class Node {
         int key = hash(keyId);
         Node node = this.findSuccessor(key);
 
-        for (Entry<Integer, String> entry : node.entries) {
+        for (ChordEntry<Integer, String> entry : node.entries) {
             if (entry.getKey() == key) return node;
         }
 
@@ -259,7 +261,7 @@ public class Node {
             throw new IndexOutOfBoundsException("Invalid Key Id");
 
         int key = hash(keyId);
-        Entry<Integer, String> entry = new Entry<>(keyId, resource);
+        ChordEntry<Integer, String> entry = new ChordEntry<>(keyId, resource);
 
         Node node = this.findSuccessor(key);
         node.entries.add(entry);
@@ -296,10 +298,10 @@ public class Node {
         int key = hash(keyId);
         Node node = this.findSuccessor(key);
 
-        List<Entry<Integer, String>> entries = node.entries;
+        List<ChordEntry<Integer, String>> entries = node.entries;
 
         for (int i = 0; i < entries.size(); i++) {
-            Entry<Integer, String> entry = entries.get(i);
+            ChordEntry<Integer, String> entry = entries.get(i);
             if (entry.getKey() == key) {
                 entries.remove(i);
                 return;
@@ -342,7 +344,7 @@ public class Node {
 
         // Should work even when there are no keys in the system
 
-        List<Entry<Integer, String>> newEntries = this.getSuccessor().updateEntries(this.getId());
+        List<ChordEntry<Integer, String>> newEntries = this.getSuccessor().updateEntries(this.getId());
 
         if (newEntries.size() != 0) {
             System.out.println("Adding them to new node " + this.getId());
@@ -387,11 +389,11 @@ public class Node {
      * @param id
      * @return entries that have been removed from this node.
      */
-    private List<Entry<Integer, String>> updateEntries(int id) {
-        List<Entry<Integer, String>> removedEntries = new ArrayList<>();
+    private List<ChordEntry<Integer, String>> updateEntries(int id) {
+        List<ChordEntry<Integer, String>> removedEntries = new ArrayList<>();
 
         for (int i=0; i < this.entries.size(); i++) {
-            Entry<Integer, String> entry = this.entries.get(i);
+            ChordEntry<Integer, String> entry = this.entries.get(i);
 
             if (inRightIncludedInterval(this.getId(), entry.getKey(), id)) {
                 System.out.println("Updating keys of Node " + this.getId());
@@ -463,14 +465,14 @@ public class Node {
 
      /**
       *
-      *  @param <K>
+      * @param <K>
       * @param <V>
       */
-     public class Entry<K, V> implements Map.Entry<K, V> {
+     public class ChordEntry<K, V> implements Entry<K, V> {
         private final K key;
         private V resource;
 
-        public Entry(final K key, final V resource) {
+        private ChordEntry(final K key, final V resource) {
             this.key = key;
             this.resource = resource;
         }

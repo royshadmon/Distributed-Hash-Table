@@ -5,5 +5,6 @@ public interface ChordNode {
     void join(ChordNode node);
     void insert(int keyId);
     void remove(int keyId);
+    void leave();
     void prettyPrint();
 }

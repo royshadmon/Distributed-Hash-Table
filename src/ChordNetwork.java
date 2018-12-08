@@ -1,5 +1,3 @@
-import org.omg.PortableInterceptor.INACTIVE;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -128,6 +126,8 @@ public class ChordNetwork {
             for (int i = 0; i < numberOfKeys; i++) {
                 int randomIndex = generator.nextInt(FingerTable.MAX_NODES - i);
                 int keyId = ids.get(randomIndex);
+                ids.remove(randomIndex);
+
                 keyList.add(keyId);
             }
             System.out.println("Keys that have been generated: " + keyList);
