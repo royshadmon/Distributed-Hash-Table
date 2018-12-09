@@ -8,10 +8,8 @@ public class Node {
     private int nodeId;
     private Node predecessor;
     private FingerTable table;
-//    private List<Integer> keys;
     private List<ChordEntry<Integer, String>> entries;
 
-    private static boolean lookupPrint = false;
 
     Node (int nodeId) {
         if (!inLeftIncludedInterval(0, nodeId, FingerTable.MAX_NODES))
@@ -19,14 +17,12 @@ public class Node {
 
         this.nodeId = hash(nodeId);
         this.table = new FingerTable(nodeId);
-//        this.keys = new ArrayList<>();
         this.entries = new ArrayList<>();
         this.predecessor = null;
     }
 
     public int getId() { return this.nodeId; }
 
-//    public List<Integer> getEntries() { return this.entries; }
 
     /************************************************************************************************
      NODE JOIN METHODS - Methods involved in the addition of a new node to the network.
@@ -48,7 +44,6 @@ public class Node {
 
             this.initFingerTable(helper);
             this.updateOthers();
-//            this.migrateKeys();
             this.migrateEntries();
             this.prettyPrint();
         }
@@ -149,7 +144,6 @@ public class Node {
             return;
         }
 
-//        this.getSuccessor().getKeys().addAll(this.getKeys());
         this.getSuccessor().entries.addAll(this.entries);
 
         List<Node> activeNodes = this.getActiveNodes();
@@ -167,7 +161,6 @@ public class Node {
 
         this.getSuccessor().predecessor = this.predecessor;
         this.table = new FingerTable(this.getId());
-//        this.keys = new ArrayList<>();
         this.entries = new ArrayList<>();
     }
 
@@ -195,25 +188,6 @@ public class Node {
      KEY METHODS - Methods used for the addition and removal of keys in the network
      ************************************************************************************************
 
-//    /**
-//     * If the key exists, returns the node containing the key. Else returns null.
-//     *
-//     * @param keyId
-//     * @return Node or null
-//     * @throws IndexOutOfBoundsException Keys must be between 0 and 255.
-//     */
-//    public Node find_v1(int keyId) {
-//        if (!inLeftIncludedInterval(0, keyId, FingerTable.MAX_NODES))
-//            throw new IndexOutOfBoundsException("Invalid Key Id");
-//
-//        int key = hash(keyId);
-//        Node node = this.findSuccessor(key);
-//
-//        if (node.getKeys().indexOf(key) != -1) return node;
-//        else return null;
-//    }
-
-
     /**
      * If the key exists, returns the node containing the key. Else returns null.
      *
@@ -236,21 +210,6 @@ public class Node {
     }
 
 
-//    /**
-//     * Inserts the key at the Successor of the keyId.
-//     *
-//     * @param keyId
-//     * @throws IndexOutOfBoundsException Keys must be between 0 and 255.
-//     */
-//    public void insert(int keyId) {
-//        if (!inLeftIncludedInterval(0, keyId, FingerTable.MAX_NODES))
-//            throw new IndexOutOfBoundsException("Invalid Key Id");
-//
-//        int key = hash(keyId);
-//        Node node = this.findSuccessor(key);
-//        node.getKeys().add(key);
-//    }
-
     /**
      * Inserts the key at the Successor of the keyId.
      *
@@ -267,23 +226,6 @@ public class Node {
         node.entries.add(entry);
     }
 
-//    /**
-//     * If present, removes the key from the correct node.
-//     *
-//     * @param keyId
-//     * @throws IndexOutOfBoundsException Keys must be between 0 and 255.
-//     */
-//    public void remove(int keyId) {
-//        if (!inLeftIncludedInterval(0, keyId, FingerTable.MAX_NODES))
-//            throw new IndexOutOfBoundsException("Invalid Key Id");
-//
-//        int key = hash(keyId);
-//        Node node = this.findSuccessor(key);
-//
-//        int index = node.getKeys().indexOf(key);
-//        if (index != -1) node.getKeys().remove(index);
-//        else System.out.println("Key with id " + keyId + " not found");
-//    }
 
     /**
      *  If present, removes the key from the correct node.
@@ -311,27 +253,6 @@ public class Node {
         System.out.println("Key with id " + keyId + " not found");
     }
 
-//    /**
-//     * This function is called when a new node joins, and transfers keys to the node (this node) joining the network.
-//     *
-//     */
-//    private void migrateKeys() {
-//        // 1. This function should find the successor of the node, from the finger table,
-//        // 2. Update the successor's key set to remove keys it should no longer manage.
-//        // 3. Add those keys to this node's key set
-//
-//        // Should work even when there are no keys in the system
-//
-//        List<Integer> newKeys = this.getSuccessor().updateKeys(this.getId());
-//
-//        if (newKeys.size() != 0) {
-//            System.out.println("Adding them to new node " + this.getId());
-//            this.getKeys().addAll(newKeys);
-//            System.out.println("----------------------");
-//            System.out.println();
-//        }
-//    }
-
 
     /**
      * This function is called when a new node joins, and transfers keys to the node (this node) joining the network.
@@ -353,34 +274,6 @@ public class Node {
             System.out.println();
         }
     }
-
-
-//    /**
-//     *  Removes keys that no longer belong to this node.
-//     *
-//     * @param id
-//     * @return keys that have been removed from this node.
-//     */
-//    private List<Integer> updateKeys(int id) {
-//        List<Integer> removedKeys = new ArrayList<>();
-//
-//        for (int i=0; i < this.getKeys().size(); i++) {
-//            int key = this.getKeys().get(i);
-//
-//            if (inRightIncludedInterval(this.getId(), key, id)) {
-//                System.out.println("Updating keys of Node " + this.getId());
-//                System.out.println();
-//                System.out.println("Removing key with id: " + key);
-//
-//                removedKeys.add(key);
-//                this.getKeys().remove(i);
-//                i--;
-//            }
-//
-//        }
-//
-//        return removedKeys;
-//    }
 
 
     /**
@@ -530,12 +423,10 @@ public class Node {
 
     public void prettyPrint() {
         this.table.prettyPrint();
-//        if (this.getKeys().size() > 0)
-//            System.out.println("Node " + this + "'s keys are: " + this.getKeys());
 
         if (this.entries.size() > 0)
             System.out.println("Node " + this + "'s Resource Keys are: " + this.entries);
-        System.out.println("\n___________________________________");
+        System.out.println("\n___________________________________\n");
     }
 
     public String toString() { return "" + this.getId(); }
