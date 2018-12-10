@@ -10,6 +10,9 @@ public class Node {
     private FingerTable table;
     private List<ChordEntry<Integer, String>> entries;
 
+    /* Used for printing node's during lookup */
+    private static boolean DEBUG = false;
+
 
     Node (int nodeId) {
         if (!inLeftIncludedInterval(0, nodeId, FingerTable.MAX_NODES))
@@ -29,7 +32,6 @@ public class Node {
      ************************************************************************************************
 
     /*
-     *
      * Join allows new nodes to join the network with the help of an arbitrary node already in the network.
      *
      * @param helper is the Bootstrapper node provided to the node that is joining. If node is null then
@@ -45,17 +47,16 @@ public class Node {
             this.initFingerTable(helper);
             this.updateOthers();
             this.migrateEntries();
-            this.prettyPrint();
         }
+        this.prettyPrint();
     }
-
 
 
     /**
      * Initializes the finger table of the joining node.
      *
      * @param helper is the bootstrapper node. The node that is joining uses network state information
-     *                      provided by the bootstrapper node to populate its finger tables.
+     *               provided by the bootstrapper node to populate its finger tables.
      */
     private void initFingerTable(Node helper) {
 
@@ -67,7 +68,6 @@ public class Node {
         for (int i = 2; i <= FingerTable.MAX_ENTRIES; i++) {
             if (inLeftIncludedInterval(this.getId(), this.computeStart(i), this.get(i-1).getId()))
                 this.put(i, this.get(i-1));
-
             else {
                 Node successor = helper.findSuccessor(this.computeStart(i));
 
@@ -87,18 +87,19 @@ public class Node {
         for (int i = 1; i <= FingerTable.MAX_ENTRIES; i++) {
             int updateIndex = computeUpdateIndex(i-1);
 
-            Node pred = this.findPredecessor(updateIndex);
+            Node predecessor = this.findPredecessor(updateIndex);
 
-            if (pred.getSuccessor().getId() == updateIndex) pred = pred.getSuccessor();
+            if (predecessor.getSuccessor().getId() == updateIndex)
+                predecessor = predecessor.getSuccessor();
 
-            pred.updateFingerTable(this, i);
+            predecessor.updateFingerTable(this, i);
         }
     }
 
 
     /**
-     *  Updates a specific entry of the finger table of this node if required,
-     *  with the node that has just joined the network.
+     * Updates a specific entry of the finger table of this node if required,
+     * with the node that has just joined the network.
      *
      * @param node This is the node that has just joined the network, and needs to be added
      *             to the finger table of this node.
@@ -126,7 +127,6 @@ public class Node {
             this.put(i, this);
 
         this.predecessor = this;
-        this.prettyPrint();
     }
 
 
@@ -135,7 +135,8 @@ public class Node {
      ************************************************************************************************
 
     /**
-     *
+     * This function is invoked when the node wants to leave the network.
+     * It triggers a rebuilding of Fingertables of the remaining nodes in the fingertable.
      */
     public void leave() {
 
@@ -162,10 +163,11 @@ public class Node {
         this.getSuccessor().predecessor = this.predecessor;
         this.table = new FingerTable(this.getId());
         this.entries = new ArrayList<>();
+        this.predecessor = null;
     }
 
     /**
-     *
+     * Creates an iterable list of all nodes in the network. Time Complexity is O(N)
      * @return
      */
     private List<Node> getActiveNodes(){
@@ -199,8 +201,17 @@ public class Node {
         if (!inLeftIncludedInterval(0, keyId, FingerTable.MAX_NODES))
             throw new IndexOutOfBoundsException("Invalid Key Id");
 
+        DEBUG = true;
+
+        System.out.println("--------------------------------------------------");
+        System.out.println("Node's involved in Find operation for key " + keyId + " are: ");
+
         int key = hash(keyId);
         Node node = this.findSuccessor(key);
+
+        System.out.println("--------------------------------------------------");
+
+        DEBUG = false;
 
         for (ChordEntry<Integer, String> entry : node.entries) {
             if (entry.getKey() == key) return node;
@@ -279,7 +290,7 @@ public class Node {
     /**
      * Removes entries that no longer belong to this node.
      *
-     * @param id
+     * @param id of the node joining the network
      * @return entries that have been removed from this node.
      */
     private List<ChordEntry<Integer, String>> updateEntries(int id) {
@@ -324,9 +335,11 @@ public class Node {
     private Node findPredecessor(int id) {
         Node predecessor = this;
 
-        while (!inRightIncludedInterval(predecessor.getId(), id, predecessor.getSuccessor().getId()))
+        while (!inRightIncludedInterval(predecessor.getId(), id, predecessor.getSuccessor().getId())) {
             predecessor = predecessor.findClosestPrecedingFinger(id);
 
+            if (DEBUG) System.out.println(predecessor);
+        }
         return predecessor;
     }
 

@@ -70,6 +70,5 @@ class FingerTable {
 
         System.out.println(f.get(ent1).getId());
         System.out.println(f.get(ent2).getId());
-
     }
 }

@@ -43,7 +43,6 @@ public class ChordNetwork {
         System.out.println(node0.find(0));
         System.out.println("End Finding Keys\n");
 
-
         node3.insert(keys.get(5), resource);
         node0.insert(keys.get(6), resource);
         node0.insert(keys.get(7), resource);
@@ -85,6 +84,16 @@ public class ChordNetwork {
         System.out.println("Finding keys");
         System.out.println(node5.find(64));
         System.out.println(node2.find(232));
+
+        node5.remove(64);
+        node5.remove(232);
+
+        System.out.println("Should return null, and so this should print true");
+        System.out.println(node5.find(64) == null);
+
+        System.out.println("Should return null, and so this should print true");
+        System.out.println(node2.find(232) == null);
+
         System.out.println("End Finding Keys\n");
 
 
@@ -154,7 +163,5 @@ public class ChordNetwork {
 
             return idList;
         }
-
     }
-
 }
