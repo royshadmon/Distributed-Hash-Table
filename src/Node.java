@@ -458,7 +458,7 @@ public class Node {
      * @param number
      * @return
      */
-    private static int hash(int number) { return number & 0xff; }
+    private static int hash(int number) { return number; }
 
 
     /**

@@ -14,7 +14,7 @@ JFLAGS = -g
 # typing 'make' will invoke the first target entry in the makefile 
 # (the default one in this case)
 #
-default: Node.class FingerTable.class
+default: ChordNetwork.class Node.class FingerTable.class
 
 # this target entry builds the Average class
 # the Average.class file is dependent on the Average.java file
@@ -22,6 +22,9 @@ default: Node.class FingerTable.class
 #
 Node.class: Node.java
 	$(JCC) $(JFLAGS) Node.java
+
+ChordNetwork.class: ChordNetwork.java
+	$(JCC) $(JFLAGS) ChordNetwork.java
 
 FingerTable.class: FingerTable.java
 	$(JCC) $(JFLAGS) FingerTable.java
